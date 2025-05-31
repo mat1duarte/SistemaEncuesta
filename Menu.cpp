@@ -3,14 +3,15 @@
 #include <stdlib.h>
 
 #include "structs.h"
+#include "encuestas.h"
 
-void menuEncuesta();
+void menuEncuesta(Encuesta **top);
 void menuPregunta();
 void menuRespuesta();
 
 int main(){
 	
-	
+	Encuesta *tp=NULL;
 	char op;
 	int band=1;
 	
@@ -40,7 +41,7 @@ int main(){
 			break;
 		
 			case '1':
-				menuEncuesta();
+				menuEncuesta(&tp);
 			break;
 		
 			case '2':
@@ -60,7 +61,7 @@ int main(){
 	return 0;
 }
 
-void menuEncuesta(){
+void menuEncuesta(Encuesta **top){
 	char op;
 	int band = 1;
 	
@@ -71,7 +72,8 @@ void menuEncuesta(){
 		printf("1- Alta Encuesta.\n");
 		printf("2- Baja Encuesta.\n");
 		printf("3- Modificar Encuesta.\n");
-		printf("4- Listar Encuesta.\n");
+		printf("4- Listar Encuestas.csv.\n");
+		printf("5- Listar pila Encuestas\n");
 		printf("0- Volver.\n");
 		
 		fflush(stdin);
@@ -91,7 +93,7 @@ void menuEncuesta(){
 			case '1':
 				system("cls");				
 				//Alta Encuesta
-				
+				altaEncuesta(&(*top));
 			break;
 			
 			case '2':
@@ -108,10 +110,15 @@ void menuEncuesta(){
 			
 			case '4':
 				system("cls");
-				//Listar Encuesta
+				//Listar Encuesta (archivo csv)
+				listarEncuestas();
 				
 			break;
-
+			
+			case '5':
+				//Listar pila Encuesta
+				listarPila(&(*top));
+			break;
 			
 			default:
 				system("cls");
