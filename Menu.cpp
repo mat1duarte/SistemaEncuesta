@@ -99,7 +99,7 @@ void menuEncuesta(Encuesta **top){
 			case '2':
 				system("cls");
 				//Baja Encuesta
-				
+				bajaEncuesta(&(*top));
 			break;
 			
 			case '3':
