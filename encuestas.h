@@ -12,12 +12,15 @@ void desapilar(Encuesta **ds, Encuesta **tope);
 int vaciaP(Encuesta *top);
 void altaEncuesta(Encuesta **tope);
 void bajaEncuesta(Encuesta **tope);
+void modificarEncuesta(Encuesta **tope);
+
 
 //Funciones de prueba
 void listarEncuestas();
 void listarPila(Encuesta **tope);
 void controlID(int *ID);
-
+void listartodapila(Encuesta **tope);
+void actualizarCSV(Encuesta *tope);
 
 // Funci�n para generar el pr�ximo ID disponible
 int generarNuevoId() {
@@ -256,7 +259,7 @@ void controlID(int *ID){
 
     do {
         // Solicita ingreso del ID
-        printf("Ingrese el ID de la encuesta a dar de baja: ");
+        printf("Ingrese el ID: ");
         resultado = scanf("%d", ID);
 
         // Validaci�n de entrada num�rica
@@ -281,4 +284,160 @@ void controlID(int *ID){
     printf("ID confirmado: %d\n", ID);
 
     
+}
+
+void modificarEncuesta(Encuesta **tope) {
+    if (vaciaP(*tope)) {
+        printf("La pila de encuestas está vacía\n");
+        return;
+    }
+
+    int idModificar;
+    
+    printf("\n--- Modificar Encuesta ---\n");
+  
+    listartodapila(&(*tope));
+    controlID(&idModificar);
+
+    // Pila auxiliar para buscar la encuesta
+    Encuesta *pilaAux = NULL;
+    Encuesta *encuestaModificar = NULL;
+    int encontrada = 0;
+
+    // Buscar la encuesta en la pila
+    while (!vaciaP(*tope) && !encontrada) {
+        Encuesta *actual;
+        desapilar(&actual, tope);
+        
+        if (actual->EncuestaId == idModificar) {
+            encuestaModificar = actual;
+            encontrada = 1;
+        } else {
+            apilar(&actual, &pilaAux);
+        }
+    }
+
+    // Si no se encontró, restaurar la pila y salir
+    if (!encontrada) {
+        printf("No se encontró encuesta con ID %d\n", idModificar);
+        // Restaurar la pila original
+        while (!vaciaP(pilaAux)) {
+            Encuesta *temp;
+            desapilar(&temp, &pilaAux);
+            apilar(&temp, tope);
+        }
+        return;
+    }
+
+    // Menú de modificación interactivo
+    int opcion;
+    do {
+        printf("\nEncuesta ID: %d\n", encuestaModificar->EncuestaId);
+        printf("1. Mes (Actual: %d)\n", encuestaModificar->EncuestaMes);
+        printf("2. Año (Actual: %d)\n", encuestaModificar->EncuestaAnio);
+        printf("3. Procesada (Actual: %s)\n", encuestaModificar->Procesada ? "Sí" : "No");
+        printf("4. Activa (Actual: %s)\n", encuestaModificar->Activa ? "Sí" : "No");
+        printf("5. Denominación (Actual: %s)\n", encuestaModificar->Denominacion);
+        printf("0. Terminar modificaciones\n");
+        printf("Seleccione campo a modificar: ");
+        scanf("%d", &opcion);
+
+        switch(opcion) {
+            case 1:
+                printf("Nuevo mes (1-12): ");
+                scanf("%d", &encuestaModificar->EncuestaMes);
+                break;
+            case 2:
+                printf("Nuevo año: ");
+                scanf("%d", &encuestaModificar->EncuestaAnio);
+                break;
+            case 3:
+                printf("¿Procesada? (1=Sí, 0=No): ");
+                scanf("%d", &encuestaModificar->Procesada);
+                break;
+            case 4:
+                printf("¿Activa? (1=Sí, 0=No): ");
+                scanf("%d", &encuestaModificar->Activa);
+                break;
+            case 5:
+                printf("Nueva denominación: ");
+                scanf(" %[^\n]", encuestaModificar->Denominacion);
+                break;
+            case 0:
+                printf("Guardando cambios...\n");
+                break;
+            default:
+                printf("Opción no válida\n");
+        }
+    } while (opcion != 0);
+
+    // Volver a apilar la encuesta modificada
+    apilar(&encuestaModificar, tope);
+
+    // Restaurar el resto de la pila
+    while (!vaciaP(pilaAux)) {
+        Encuesta *temp;
+        desapilar(&temp, &pilaAux);
+        apilar(&temp, tope);
+    }
+
+    // Actualizar el archivo CSV
+    actualizarCSV(*tope);
+    printf("Encuesta modificada exitosamente!\n");
+}
+
+void listartodapila(Encuesta **tope) {
+	
+	Encuesta *p=NULL, *tp2=NULL;
+	
+	while(vaciaP(*tope)!=1){
+		desapilar(&p, &(*tope));
+		apilar(&p,&tp2);
+	}
+	printf("\n--- Listado de Encuestas ---\n");
+    printf("ID | Mes | A�o | Procesada | Activa | Denominacion\n");
+    printf("--------------------------------------------------\n");
+	while(vaciaP(tp2)!=1){
+		desapilar(&p,&tp2);
+			printf("%2d | %2d | %4d | %9s | %6s | %s\n",
+               p->EncuestaId,
+               p->EncuestaMes,
+               p->EncuestaAnio,
+               p->Procesada ? "Si" : "No",
+               p->Activa ? "Si" : "No",
+               p->Denominacion);
+        apilar(&p,&(*tope));
+	}
+}
+
+void actualizarCSV(Encuesta *tope) {
+    // Primero invertimos la pila para guardar en orden correcto
+    Encuesta *pilaInvertida = NULL;
+    Encuesta *aux;
+    
+    while (!vaciaP(tope)) {
+        desapilar(&aux, &tope);
+        apilar(&aux, &pilaInvertida);
+    }
+    
+    // Ahora escribimos al archivo
+    FILE *archivo = fopen(ARCHIVO_CSV, "w");
+    if (archivo == NULL) {
+        printf("Error al abrir archivo para escritura\n");
+        return;
+    }
+    
+    while (!vaciaP(pilaInvertida)) {
+        desapilar(&aux, &pilaInvertida);
+        fprintf(archivo, "%d,%d,%d,%d,%d,%s\n",
+                aux->EncuestaId,
+                aux->EncuestaMes,
+                aux->EncuestaAnio,
+                aux->Procesada,
+                aux->Activa,
+                aux->Denominacion);
+        apilar(&aux, &tope); // Volvemos a construir la pila original
+    }
+    
+    fclose(archivo);
 }

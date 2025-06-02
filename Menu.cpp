@@ -105,7 +105,7 @@ void menuEncuesta(Encuesta **top){
 			case '3':
 				system("cls");
 				//Modificar Encuesta
-			
+			    modificarEncuesta(&(*top));
 			break;
 			
 			case '4':
