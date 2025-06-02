@@ -160,6 +160,7 @@ void listarEncuestas() {
     fclose(archivo);
 }
 
+// Función para listar las encuestas activas desde la pila
 void listarPila(Encuesta **tope) {
 	
 	Encuesta *p=NULL, *tp2=NULL;
@@ -253,6 +254,7 @@ void bajaEncuesta(Encuesta **tope){
     }
 }
 
+//Función para control de ID
 void controlID(int *ID){
 	int resultado;
     char confirmacion;
@@ -386,6 +388,7 @@ void modificarEncuesta(Encuesta **tope) {
     printf("Encuesta modificada exitosamente!\n");
 }
 
+// Función para listar todas las encuestas desde la pila
 void listartodapila(Encuesta **tope) {
 	
 	Encuesta *p=NULL, *tp2=NULL;
