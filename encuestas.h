@@ -109,6 +109,9 @@ void altaEncuesta(Encuesta **tope) {
     	
     	apilar(&n,&(*tope));
 	}
+		else {
+			printf("\n---No hay espacio en la memoria----\n");
+		}
     
     // Escribir los datos en formato CSV
     fprintf(archivo, "%d,%d,%d,%d,%d,%s\n",
