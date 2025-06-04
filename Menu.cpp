@@ -71,9 +71,8 @@ void menuEncuesta(Encuesta **top){
 		printf("-------------------------------------------------------------------------------\n");
 		printf("1- Alta Encuesta.\n");
 		printf("2- Baja Encuesta.\n");
-		printf("3- Modificar Encuesta.\n");
-		printf("4- Listar Encuestas.csv.\n");
-		printf("5- Listar pila Encuestas\n");
+		printf("3- Listar Encuestas.csv.\n");
+		printf("4- Listar pila Encuestas\n");
 		printf("0- Volver.\n");
 		
 		fflush(stdin);
@@ -102,20 +101,15 @@ void menuEncuesta(Encuesta **top){
 				bajaEncuesta(&(*top));
 			break;
 			
-			case '3':
-				system("cls");
-				//Modificar Encuesta
-			    modificarEncuesta(&(*top));
-			break;
 			
-			case '4':
+			case '3':
 				system("cls");
 				//Listar Encuesta (archivo csv)
 				listarEncuestas();
 				
 			break;
 			
-			case '5':
+			case '4':
 				//Listar pila Encuesta
 				listarPila(&(*top));
 			break;
@@ -140,8 +134,7 @@ void menuPregunta(){
 		printf("-------------------------------------------------------------------------------\n");
 		printf("1- Alta Preguntas.\n");
 		printf("2- Baja Preguntas.\n");
-		printf("3- Modificar Preguntas.\n");
-		printf("4- Listar Preguntas.\n");
+		printf("3- Listar Preguntas.\n");
 		printf("0- Volver.\n");
 		
 		fflush(stdin);
@@ -172,12 +165,6 @@ void menuPregunta(){
 			
 			case '3':
 				system("cls");
-				//Modificar Preguntas
-				
-			break;
-			
-			case '4':
-				system("cls");
 				//Listar Preguntas
 				
 			break;
@@ -203,8 +190,7 @@ void menuRespuesta(){
 		printf("-------------------------------------------------------------------------------\n");
 		printf("1- Alta Respuestas.\n");
 		printf("2- Baja Respuestas.\n");
-		printf("3- Modificar Respuestas.\n");
-		printf("4- Listar Respuestas.\n");
+		printf("3- Listar Respuestas.\n");
 		printf("0- Volver.\n");
 		
 		fflush(stdin);
@@ -233,13 +219,8 @@ void menuRespuesta(){
 				
 			break;
 			
-			case '3':
-				system("cls");
-				//Modificar Respuestas
-				
-			break;
 			
-			case '4':
+			case '3':
 				system("cls");
 				//Listar Respuestas
 				
