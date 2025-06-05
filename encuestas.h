@@ -75,7 +75,7 @@ void altaEncuesta(Encuesta **tope) {
     nueva.EncuestaId = generarNuevoId();
     
     // Inicializar valores por defecto
-    nueva.Activa = 1;
+    nueva.Activa = 0;
     nueva.Procesada = 0;
     
     // Solicitar datos al usuario
@@ -108,6 +108,9 @@ void altaEncuesta(Encuesta **tope) {
     	n->sgte = NULL;
     	
     	apilar(&n,&(*tope));
+	}else{
+			printf("No hay espacio en memoria\n");
+			return;
 	}
 		else {
 			printf("\n---No hay espacio en la memoria----\n");
@@ -263,13 +266,13 @@ void controlID(int *ID){
     do {
         // Solicita ingreso del ID
         printf("Ingrese el ID: ");
-        resultado = scanf("%d", ID);
+        resultado = scanf("%d", &(*ID));
 
         // Validación de entrada numérica
         while (resultado != 1) {
             while (getchar() != '\n'); // Limpia el buffer
             printf("Entrada inválida. Ingrese un número entero para el ID: ");
-            resultado = scanf("%d", ID);
+            resultado = scanf("%d", &(*ID));
         }
 
         // Limpia el buffer antes de leer el char
@@ -278,13 +281,13 @@ void controlID(int *ID){
         // Confirmación del ID
         printf("¿Está seguro de que el ID ingresado es correcto? (s/n): ");
         scanf("%c", &confirmacion);
-
+		
         // Limpia el buffer por si hay más caracteres
         while (getchar() != '\n');
 
     } while (confirmacion == 'n' || confirmacion == 'N');
 
-    printf("ID confirmado: %d\n", ID);
+    printf("ID confirmado: %d\n", (*ID));
 
     
 }
@@ -312,6 +315,32 @@ void listartodapila(Encuesta **tope) {
                p->Procesada ? "Si" : "No",
                p->Activa ? "Si" : "No",
                p->Denominacion);
+        apilar(&p,&(*tope));
+	}
+}
+
+void listarEncInactivos(Encuesta **tope) {
+	
+	Encuesta *p=NULL, *tp2=NULL;
+	
+	while(vaciaP(*tope)!=1){
+		desapilar(&p, &(*tope));
+		apilar(&p,&tp2);
+	}
+	printf("\n--- Listado de Encuestas ---\n");
+    printf("ID | Mes | Año | Procesada | Activa | Denominacion\n");
+    printf("--------------------------------------------------\n");
+	while(vaciaP(tp2)!=1){
+		desapilar(&p,&tp2);
+		if(p->Activa==0){
+			printf("%2d | %2d | %4d | %9s | %6s | %s\n",
+               p->EncuestaId,
+               p->EncuestaMes,
+               p->EncuestaAnio,
+               p->Procesada ? "Si" : "No",
+               p->Activa ? "Si" : "No",
+               p->Denominacion);
+        }
         apilar(&p,&(*tope));
 	}
 }

@@ -4,14 +4,16 @@
 
 #include "structs.h"
 #include "encuestas.h"
+#include "Preguntas.h"
 
 void menuEncuesta(Encuesta **top);
-void menuPregunta();
+void menuPregunta(Encuesta **top, Pregunta **LPreg);
 void menuRespuesta();
 
 int main(){
 	
 	Encuesta *tp=NULL;
+	Pregunta *LPregunta=NULL;
 	char op;
 	int band=1;
 	
@@ -45,7 +47,7 @@ int main(){
 			break;
 		
 			case '2':
-				menuPregunta();
+				menuPregunta(&tp, &LPregunta);
 			break;
 		
 			case '3':
@@ -111,7 +113,7 @@ void menuEncuesta(Encuesta **top){
 			
 			case '4':
 				//Listar pila Encuesta
-				listarPila(&(*top));
+				listartodapila(&(*top));
 			break;
 			
 			default:
@@ -124,7 +126,7 @@ void menuEncuesta(Encuesta **top){
 }
 
 
-void menuPregunta(){
+void menuPregunta(Encuesta **top, Pregunta **LPreg){
 	char op;
 	int band = 1;
 	
@@ -154,7 +156,7 @@ void menuPregunta(){
 			case '1':
 				system("cls");				
 				//Alta Preguntas
-				
+				altaPregunta(&(*top), &(*LPreg));
 			break;
 			
 			case '2':
