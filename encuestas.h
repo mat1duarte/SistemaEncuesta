@@ -11,7 +11,9 @@ void apilar(Encuesta **nv, Encuesta **tope);
 void desapilar(Encuesta **ds, Encuesta **tope);
 int vaciaP(Encuesta *top);
 void altaEncuesta(Encuesta **tope);
-void bajaEncuesta(Encuesta **tope);
+void bajaEncuesta(Encuesta **tope, Pregunta *LPG);
+void bajaPG(Pregunta *ini, int idencuesta, Respuesta *iniRes);
+void BajaRes(int idpregunta, Respuesta *rcRes);
 
 
 //Funciones de prueba
@@ -191,7 +193,7 @@ void listarPila(Encuesta **tope) {
 	}
 }
 
-void bajaEncuesta(Encuesta **tope){
+void bajaEncuesta(Encuesta **tope, Pregunta *LPG){
 	int idBaja;
 	Encuesta *p=NULL, *tp2=NULL;
     printf("\n--- Baja de Encuesta ---\n");
@@ -201,6 +203,7 @@ void bajaEncuesta(Encuesta **tope){
     	desapilar(&p, &(*tope));
     	if(p->EncuestaId == idBaja){
     		p->Activa = 0;
+    		bajaPG(*LPG, idBaja);
 		}
 	apilar(&p, &tp2); // guarda todo temporalmente
 	}
@@ -345,4 +348,30 @@ void listarEncInactivos(Encuesta **tope) {
 	}
 }
 
+void bajaPG(Pregunta *ini, int idencuesta, Respuesta *iniRes){
+	while (ini!= NULL){
+		if (ini->EncuestaId == idencuesta){
+			BajaRes(ini->PreguntaId, iniRes);
+			ini->Activa = 0;
+		}else{
+			ini = ini->sgte;
+		}
+		ini = ini->sgte;
+	}
+}
+
+void BajaRes(int idpregunta, Respuesta *rcRes){
+	Respuesta *aux;
+	
+	if(rcRes->PreguntaId == idpregunta){
+		rcRes->Activa = 0;
+	}
+	aux = rcRes->sgte;
+	while (aux != rcRes){
+		if(rcRes->PreguntaId == idpregunta){
+		rcRes->Activa = 0;
+		}			
+		aux = rcRes->sgte;
+	}
+}
 

@@ -6,7 +6,7 @@
 #include "encuestas.h"
 #include "Preguntas.h"
 
-void menuEncuesta(Encuesta **top);
+void menuEncuesta(Encuesta **top, Pregunta *LPreg);
 void menuPregunta(Encuesta **top, Pregunta **LPreg);
 void menuRespuesta();
 
@@ -43,7 +43,7 @@ int main(){
 			break;
 		
 			case '1':
-				menuEncuesta(&tp);
+				menuEncuesta(&tp, LPregunta);
 			break;
 		
 			case '2':
@@ -63,7 +63,7 @@ int main(){
 	return 0;
 }
 
-void menuEncuesta(Encuesta **top){
+void menuEncuesta(Encuesta **top, Pregunta *LPreg){
 	char op;
 	int band = 1;
 	
@@ -100,7 +100,7 @@ void menuEncuesta(Encuesta **top){
 			case '2':
 				system("cls");
 				//Baja Encuesta
-				bajaEncuesta(&(*top));
+				bajaEncuesta(&(*top), LPreg);
 			break;
 			
 			
