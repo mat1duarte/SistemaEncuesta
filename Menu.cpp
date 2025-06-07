@@ -8,12 +8,13 @@
 
 void menuEncuesta(Encuesta **top, Pregunta *LPreg);
 void menuPregunta(Encuesta **top, Pregunta **LPreg);
-void menuRespuesta();
+void menuRespuesta(Encuesta **top, Pregunta *LPreg, Respuesta **LRes);
 
 int main(){
 	
 	Encuesta *tp=NULL;
 	Pregunta *LPregunta=NULL;
+	Respuesta *LRespuesta=NULL;
 	char op;
 	int band=1;
 	
@@ -51,7 +52,7 @@ int main(){
 			break;
 		
 			case '3':
-				menuRespuesta();
+				menuRespuesta(&tp, LPregunta, &LRespuesta);
 			break;
 			default:
 				printf("\n-------------------------------------------------------------------------------");
@@ -212,7 +213,7 @@ void menuRespuesta(){
 			case '1':
 				system("cls");				
 				//Alta Respuestas
-			
+			    altaRespuesta(&(*top), LPreg, &(*LRes));
 			break;
 			
 			case '2':
