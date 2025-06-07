@@ -112,8 +112,12 @@ void listarPreguntasEnc(int idEnc, Pregunta *rc, Respuesta **iniR) {
 		   }
 		}
 		if (pond==1) { 
-		  //carga lista circular
-		  insertarLRes(&nodotemp,&(*iniR));
+		  while(initemp!=NULL) { //sacar nodo de lista temporal para cargarlo en la circular de respuestas
+		    nodotemp=initemp;
+		    initemp=initemp->sgte;
+		    nodotemp->sgte=NULL;
+		    insertarLRes(&nodotemp,&(*iniR));//carga lista circular
+		  }
 		  confirmado=1;
 		} 
 		 else { 
