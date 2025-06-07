@@ -114,9 +114,9 @@ void altaEncuesta(Encuesta **tope) {
 			printf("No hay espacio en memoria\n");
 			return;
 	}
-		else {
+		/*else {
 			printf("\n---No hay espacio en la memoria----\n");
-		}
+		}*/
     
     // Escribir los datos en formato CSV
     fprintf(archivo, "%d,%d,%d,%d,%d,%s\n",

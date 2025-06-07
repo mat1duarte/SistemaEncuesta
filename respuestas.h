@@ -10,6 +10,31 @@ Respuesta borrarlista(Respuesta *initemp);
 void insertarLRes(Respuesta **nodotemp, Respuesta **iniR);
 Respuesta buscarant(int Respid, Respuesta *rc);
 
+void bajaRespuestas(Encuesta **tope, Pregunta *iniP, Respuesta **iniR);
+void listarPreguntas(Pregunta *ini, int idencu);
+
+void bajaRespuesta(Encuesta **tope, Pregunta *iniP, Respuesta **iniR) { 
+  int idEnc=0,idpreg = 0;
+  listartodapila(&(*tope));
+  controlID(&idEnc);
+  
+  listarPreguntas(iniP,idEnc);
+  controlID(&idpreg);
+  
+  recorrerResp(&(*iniR),idpreg);
+  
+  
+}
+
+void listarPreguntas(Pregunta *ini, int idencu){
+	while(ini != NULL){
+		if(ini->EncuestaId == idencu){
+			printf("ID: %d\n%s",ini->PreguntaId,ini->Pregunta);
+		}
+		ini = ini->sgte;
+	}
+	
+}
 
 void altaRespuesta(Encuesta **tope, Pregunta *iniP, Respuesta **iniR) { 
   int idEnc=0;

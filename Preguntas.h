@@ -10,6 +10,121 @@ int generarIdPregunta(Pregunta *rc);
 float leerPonderacionValida(float sumaPond);
 Pregunta* insertarPreguntas (Pregunta *nd, Pregunta *r);
 
+void bajaPregunta(Encuesta **tope,Pregunta **ini,Respuesta ** iniC);
+Pregunta borrarPregunta(Pregunta *ini,int idPreg)
+void borrarRespuestas(int idpre, Respuesta **iniC);
+void buscarborrarRes(int id,Respuesta **rc,Respuesta **ant,int *sn);
+void recorrerResp(Respuesta *iniCir,int idpreg);
+
+void bajaPregunta(Encuesta **tope,Pregunta **ini,Respuesta **iniC){
+	int ID = 0,encon = 0;
+	
+	listartodapila(&(*tope));
+	controlID(&ID);
+	
+	while(*ini != NULL){
+		
+		if((*ini)->EncuestaId == ID){
+			if((*ini)->PreguntaId != 0){
+				encon = 1
+				//funcion para borrar respuestas
+				//recorrer la lec
+				recorrerResp(&(*iniC),(*ini->PreguntaId));
+				//funcion borrar
+				*ini = borrarPregunta(*ini,(*ini)->PreguntaId);
+				
+			}
+		}
+		*ini = *ini->sgte;
+	}
+	
+	if(encon == 0){
+		printf("La Encuesta no tiene preguntas.");
+	}
+	
+}
+
+void recorrerResp(Respuesta **iniCir,int idpreg){
+	Respuesta *aux = NULL,aux2 = NULL;
+	aux2 = *iniCir;
+	
+	if(aux2->PreguntaId == idpreg){
+		borrarRespuestas(idpreg,&(*iniCir));
+	}
+	aux = aux2->sgte;
+	while(aux != aux2){
+		if(aux->PreguntaId == idpreg){
+		borrarRespuestas(idpreg,&(*iniCir));
+		}
+		aux = aux->sgte;
+	}
+}
+
+void borrarRespuestas(int idpre, Respuesta **iniC){
+	Respuesta *ant= NULL,*bor= NULL;
+	int aBorrar = 0;
+	
+	if(*iniC != NULL){
+		bor = *iniC;
+		buscarBorrar(idpre,&bor,&ant,&aBorrar);
+			if(bor == *iniC && (*iniC)->PreguntaId == idpre){
+				*iniC = (*iniC)->sgte;
+				aBorrar = 1;
+			}
+			if(aBorrar == 1){
+				ant->sgte = bor->sgte;
+				bor->sgte = NULL;
+				free(bor);
+			}else{
+				printf("\nLa pregunta no tiene respuestas.\n");
+			}
+	}
+	
+}
+
+void buscarborrarRes(int id,Respuesta **rc,Respuesta **ant,int *sn){
+	Respuesta *aux = NULL;
+	
+	*ant = *rc;
+	aux = *rc;
+	*rc = (*rc)->sgte;
+	while((*rc != aux) && !sn){
+		
+		if((*rc)->PreguntaId == id){
+			sn = 1;
+		}else{
+			ant = *rc;
+			*rc = (*rc)->sgte ;
+		}
+		
+	}
+	
+}
+
+Pregunta borrarPregunta(Pregunta *ini, int idPreg){
+	Pregunta *aux = NULL;
+	
+	if(ini != NULL){
+		
+		if(ini->PreguntaId == idPreg){
+			
+			if(ini->sgte == NULL){
+				aux = ini;
+				ini = NULL;
+				free(aux);
+			}else{
+				aux = ini;
+				ini = ini->sgte;
+				free(aux);
+			}
+		}else{
+			ini->sgte = borrarPregunta(ini->sgte,ini->PreguntaId);
+		}
+	}
+	
+	return (ini);
+}
+
 
 void altaPregunta(Encuesta **tope, Pregunta **ini){
 	
