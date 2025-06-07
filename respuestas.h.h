@@ -8,6 +8,7 @@ void listarPreguntasEnc(int idEnc, Pregunta *rc, Respuesta **iniR);
 void incrementoRespnro(int *respid, Respuesta *iniR);
 Respuesta borrarlista(Respuesta *initemp);
 void insertarLRes(Respuesta **nodotemp, Respuesta **iniR);
+Respuesta buscarant(int Respid, Respuesta *rc);
 
 void altaRespuesta(Encuesta **tope, Pregunta *iniP, Respuesta **iniR) { 
   int idEnc=0;
@@ -130,16 +131,48 @@ Respuesta borrarlista(Respuesta *initemp) {
   return(NULL);
 } 
  
-void insertarLRes(Respuesta **nodotemp, Respuesta **iniR){ // completar insertar y buscar borrar
+void insertarLRes(Respuesta **nodotemp, Respuesta **iniR){ 
   Respuesta *ant;
   
-  if (iniR!=NULL) { 
+  if (iniR==NULL) { 
     iniR=nodotemp;
     iniR->sgte=nodotemp;
   } 
    else { 
      ant=buscarant(nodotemp->RespuestaId,iniR);
-     nodotemp->
+     nodotemp->sgte=ant->sgte;
+     ant->sgte=nodotemp;
+      if (nodotemp->RespuestaId<iniR->RespuestaId) { 
+        iniR=nodotemp;
+	  }
    }
+  nodotemp=NULL;
+} 
+
+Respuesta buscarant(int Respid, Respuesta *rc) { 
+  Respuesta *ant=NULL, *aux=NULL;
   
+  ant=rc;
+  aux=rc->sgte;
+  
+  if (rc->RespuestaId>Respid) { 
+    while(aux!=rc) { 
+      ant=aux;
+      aux=aux->sgte;
+	}
+  }
+   else { 
+     while(aux!=rc) { 
+       if (aux->RespuestaId>Respid) {
+       	 aux=rc;
+	   } 
+	    else { 
+	      ant=aux;
+	      aux=aux->sgte;
+		}
+	 }
+   }
+   return(ant);
 }
+ 
+ 
