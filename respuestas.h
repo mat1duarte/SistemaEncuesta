@@ -10,6 +10,7 @@ Respuesta borrarlista(Respuesta *initemp);
 void insertarLRes(Respuesta **nodotemp, Respuesta **iniR);
 Respuesta buscarant(int Respid, Respuesta *rc);
 
+
 void altaRespuesta(Encuesta **tope, Pregunta *iniP, Respuesta **iniR) { 
   int idEnc=0;
   listarEncInactivos(&(*tope));

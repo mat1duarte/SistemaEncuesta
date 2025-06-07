@@ -11,7 +11,6 @@ float leerPonderacionValida(float sumaPond);
 Pregunta* insertarPreguntas (Pregunta *nd, Pregunta *r);
 
 
-
 void altaPregunta(Encuesta **tope, Pregunta **ini){
 	
 	int idEnc=0;
@@ -105,7 +104,6 @@ void cargaPreguntas(int encId, Pregunta **inicio) {
     
 }
 
-
 float obtenerSumaPonderacion(int idE, Pregunta *rc){
 	float aux=0.0f;
 	while(rc!=NULL){
@@ -116,9 +114,6 @@ float obtenerSumaPonderacion(int idE, Pregunta *rc){
 	}
 	return aux;
 }
-
-
-
 
 int generarIdPregunta(Pregunta *rc) {
     int maxId = 0;
@@ -131,7 +126,6 @@ int generarIdPregunta(Pregunta *rc) {
     
     return maxId + 1; // Devolver el siguiente ID disponible
 }
-
 
 float leerPonderacionValida(float sumaPond) {
     char buffer[100];
@@ -198,7 +192,6 @@ float leerPonderacionValida(float sumaPond) {
 
     return ponderacion;
 }
-
 
 Pregunta* insertarPreguntas (Pregunta *nd, Pregunta *r){
 	

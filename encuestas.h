@@ -15,12 +15,12 @@ void bajaEncuesta(Encuesta **tope, Pregunta *LPG);
 void bajaPG(Pregunta *ini, int idencuesta, Respuesta *iniRes);
 void BajaRes(int idpregunta, Respuesta *rcRes);
 
-
 //Funciones de prueba
 void listarEncuestas();
 void listarPila(Encuesta **tope);
 void controlID(int *ID);
 void listartodapila(Encuesta **tope);
+
 
 // Funci�n para generar el pr�ximo ID disponible
 int generarNuevoId() {
@@ -295,8 +295,6 @@ void controlID(int *ID){
     
 }
 
-
-
 // Funci�n para listar todas las encuestas desde la pila
 void listartodapila(Encuesta **tope) {
 	
@@ -353,11 +351,56 @@ void bajaPG(Pregunta *ini, int idencuesta, Respuesta *iniRes){
 		if (ini->EncuestaId == idencuesta){
 			BajaRes(ini->PreguntaId, iniRes);
 			ini->Activa = 0;
-		}else{
-			ini = ini->sgte;
 		}
 		ini = ini->sgte;
 	}
+	
+	FILE *archivo = fopen("preguntas.csv", "r");
+    if (archivo == NULL) {
+        printf("Error al abrir el archivo de preguntas\n");
+        return;
+    }
+
+    // Creamos un archivo temporal
+    FILE *temp = fopen("temp.csv", "w");
+    if (temp == NULL) {
+        printf("Error al crear archivo temporal\n");
+        fclose(archivo);
+        return;
+    }
+
+    char linea[256];
+    // Leemos la cabecera (si existe) y la copiamos
+    if (fgets(linea, sizeof(linea), archivo)) {
+        fprintf(temp, "%s", linea);
+    }
+
+    // Procesamos cada línea del archivo
+    while (fgets(linea, sizeof(linea), archivo) {
+        int preguntaId, encuestaId, ponderacion, activa;
+        char pregunta[100];
+
+        // Parseamos la línea
+        if (sscanf(linea, "%d,%d,%d,%d,%[^\n]", 
+                   &preguntaId, &encuestaId, &ponderacion, &activa, pregunta) == 5) {
+            
+            // Si es de la encuesta a dar de baja, marcamos como inactiva
+            if (encuestaId == idencuesta) {
+                activa = 0;
+            }
+            
+            // Escribimos la línea (modificada o no) en el temporal
+            fprintf(temp, "%d,%d,%d,%d,%s\n", 
+                   preguntaId, encuestaId, ponderacion, activa, pregunta);
+        }
+    }
+
+    fclose(archivo);
+    fclose(temp);
+
+    // Reemplazamos el archivo original
+    remove("preguntas.csv");
+    rename("temp.csv", "preguntas.csv");
 }
 
 void BajaRes(int idpregunta, Respuesta *rcRes){
@@ -368,10 +411,57 @@ void BajaRes(int idpregunta, Respuesta *rcRes){
 	}
 	aux = rcRes->sgte;
 	while (aux != rcRes){
-		if(rcRes->PreguntaId == idpregunta){
-		rcRes->Activa = 0;
+		if(aux->PreguntaId == idpregunta){
+		aux->Activa = 0;
 		}			
-		aux = rcRes->sgte;
+		aux = aux->sgte;
 	}
+	// Ahora actualizamos el archivo
+    FILE *archivoOriginal, *archivoTemporal;
+    char linea[200];
+    char tempFilename[] = "temp_preguntas.csv";
+    
+    archivoOriginal = fopen("preguntas.csv", "r");
+    if (archivoOriginal == NULL) {
+        perror("Error al abrir el archivo original");
+        return;
+    }
+    
+    archivoTemporal = fopen(tempFilename, "w");
+    if (archivoTemporal == NULL) {
+        perror("Error al crear archivo temporal");
+        fclose(archivoOriginal);
+        return;
+    }
+    
+    // Procesamos cada línea del archivo original
+    while (fgets(linea, sizeof(linea), archivoOriginal) {
+        int currentPreguntaId, currentRespuestaId, nro, ponderacion, activa;
+        char respuesta[50];
+        
+        // Parseamos la línea (asumiendo formato: id_pregunta,id_respuesta,nro,respuesta,ponderacion,activa)
+        if (sscanf(linea, "%d,%d,%d,%[^,],%d,%d", 
+                  &currentPreguntaId, &currentRespuestaId, &nro, respuesta, &ponderacion, &activa) == 6) {
+            
+            // Si es una respuesta de la pregunta que nos interesa, la desactivamos
+            if (currentPreguntaId == idpregunta) {
+                activa = 0;
+            }
+            
+            // Escribimos la línea (modificada o no) en el temporal
+            fprintf(archivoTemporal, "%d,%d,%d,%s,%d,%d\n", 
+                   currentPreguntaId, currentRespuestaId, nro, respuesta, ponderacion, activa);
+        } else {
+            // Si no pudo parsearse, copiamos la línea tal cual (podrían ser encabezados)
+            fprintf(archivoTemporal, "%s", linea);
+        }
+    }
+    
+    fclose(archivoOriginal);
+    fclose(archivoTemporal);
+    
+    // Reemplazamos el archivo original con el temporal
+    remove("preguntas.csv");
+    rename(tempFilename, "preguntas.csv");
 }
 

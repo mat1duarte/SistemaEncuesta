@@ -5,10 +5,12 @@
 #include "structs.h"
 #include "encuestas.h"
 #include "Preguntas.h"
+#include "respuestas.h"
 
 void menuEncuesta(Encuesta **top, Pregunta *LPreg);
 void menuPregunta(Encuesta **top, Pregunta **LPreg);
 void menuRespuesta(Encuesta **top, Pregunta *LPreg, Respuesta **LRes);
+
 
 int main(){
 	
@@ -126,7 +128,6 @@ void menuEncuesta(Encuesta **top, Pregunta *LPreg){
 	}
 }
 
-
 void menuPregunta(Encuesta **top, Pregunta **LPreg){
 	char op;
 	int band = 1;
@@ -181,7 +182,6 @@ void menuPregunta(Encuesta **top, Pregunta **LPreg){
 		}
 	}
 }
-
 
 void menuRespuesta(){
 	char op;
