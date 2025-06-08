@@ -8,8 +8,8 @@
 #include "respuestas.h"
 
 
-void menuEncuesta(Encuesta **top, Pregunta *LPreg);
-void menuPregunta(Encuesta **top, Pregunta **LPreg);
+void menuEncuesta(Encuesta **top, Pregunta *LPreg, Respuesta *LRes);
+void menuPregunta(Encuesta **top, Pregunta **LPreg, Respuesta **LRespuesta);
 void menuRespuesta(Encuesta **top, Pregunta *LPreg, Respuesta **LRes);
 
 
@@ -47,7 +47,7 @@ int main(){
 			break;
 		
 			case '1':
-				menuEncuesta(&tp, LPregunta);
+				menuEncuesta(&tp, LPregunta, LRespuesta);
 			break;
 		
 			case '2':
@@ -67,7 +67,7 @@ int main(){
 	return 0;
 }
 
-void menuEncuesta(Encuesta **top, Pregunta *LPreg){
+void menuEncuesta(Encuesta **top, Pregunta *LPreg, Respuesta *LRes){
 	char op;
 	int band = 1;
 	
@@ -104,7 +104,7 @@ void menuEncuesta(Encuesta **top, Pregunta *LPreg){
 			case '2':
 				system("cls");
 				//Baja Encuesta
-				bajaEncuesta(&(*top), LPreg);
+				bajaEncuesta(&(*top), LPreg, LRes);
 			break;
 			
 			
@@ -171,7 +171,7 @@ void menuPregunta(Encuesta **top, Pregunta **LPreg,Respuesta **LRespuesta){
 			case '3':
 				system("cls");
 				//Listar Preguntas
-				
+				ListarLESPreguntas(*LPreg);
 			break;
 
 			
@@ -227,6 +227,7 @@ void menuRespuesta(Encuesta **top, Pregunta *LPreg, Respuesta **LRes){
 			case '3':
 				system("cls");
 				//Listar Respuestas
+				ListarLcRespuestas(*LRes);
 				
 			break;
 

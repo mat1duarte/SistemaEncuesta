@@ -5,15 +5,17 @@
 void altaRespuesta(Encuesta **tope, Pregunta *iniP, Respuesta **iniR);
 void listarEncInactivos(Encuesta **tope);
 void listarPreguntasEnc(int idEnc, Pregunta *rc, Respuesta **iniR);
-void incrementoRespnro(int *respid, Respuesta *iniR);
-Respuesta borrarlista(Respuesta *initemp);
+void incrementoResid(int *respid, Respuesta *iniR);
+Respuesta* borrarlista(Respuesta *initemp);
+Respuesta* cargarListaTemp(Respuesta *rcTemp, Respuesta **iniRS);
 void insertarLRes(Respuesta **nodotemp, Respuesta **iniR);
-Respuesta buscarant(int Respid, Respuesta *rc);
+Respuesta* buscarant(int Respid, Respuesta *rc);
 
 void bajaRespuestas(Encuesta **tope, Pregunta *iniP, Respuesta **iniR);
 void listarPreguntas(Pregunta *ini, int idencu);
+void ListarLcRespuestas(Respuesta *);
 
-void bajaRespuesta(Encuesta **tope, Pregunta *iniP, Respuesta **iniR) { 
+void bajaRespuestas(Encuesta **tope, Pregunta *iniP, Respuesta **iniR) { 
   int idEnc=0,idpreg = 0;
   listartodapila(&(*tope));
   controlID(&idEnc);
@@ -45,110 +47,113 @@ void altaRespuesta(Encuesta **tope, Pregunta *iniP, Respuesta **iniR) {
 }
 
 void listarPreguntasEnc(int idEnc, Pregunta *rc, Respuesta **iniR) { 
-  Pregunta *aux;
-  Respuesta *nodotemp=NULL, *initemp=NULL;
-  aux=rc;
-  int controlistadopreg=0, idpregunta,cantidadres=0, confirmado=0,respuestabucle=0, respid=0, respnro=0,pond=0;
-  char respuesta[100];
-  while(rc!=NULL) { 
-    if (rc->EncuestaId==idEnc) { 
-      controlistadopreg=1;
-      rc=NULL;
-	} 
-    rc=(rc)->sgte;
-  }
+	Pregunta *aux=NULL;
+	Respuesta *nodotemp=NULL, *initemp=NULL;
+	int controlistadopreg=0, idpregunta,cantidadres=0, confirmado=0,respuestabucle=0, respnro=0,pond=0;
+	char respuesta[50];
+	
+	aux=rc;
   
-  if (controlistadopreg==0) { 
-    printf("\n----- La encuesta aun no tiene preguntas -----\n");
-  }
-   else { 
-     rc=aux;
-	 aux=NULL;
-     printf("\n----- Listado de preguntas encuesta id --> %d",rc->EncuestaId);
-     while(rc!=NULL) {
-	 confirmado=0; 
-      if (rc->EncuestaId==idEnc) { 
-          printf("\n%s\n",rc->Pregunta);
-        while (confirmado!=1) {
-		strcpy(respuesta,"1");  
-          while(strcmp(respuesta,"0")!=0) { 
-          nodotemp=(struct Respuesta*) malloc(sizeof(struct Respuesta));
-          if (nodotemp!=NULL) { 
-            printf("\nCargue la respuesta: \n");
-            nodotemp->Activa=0;
-            nodotemp->PreguntaId=rc->PreguntaId;
-            incrementoResid(&respid,*iniR);
-            nodotemp->RespuestaId=respid;
-            nodotemp->RespuestaNro=respnro++;
-            
-            
-            
-            if (respnro<=2) { 
-              printf("\nIngrese la respuesta nro %d: ",nodotemp->RespuestaNro);
-              gets(respuesta);
-			} 
-		    if (respnro>2) { 
-			   printf("\nIngrese la respuesta nro %d o 0 para finalizar: ",nodotemp->RespuestaNro);
-			   gets(respuesta);
-			}
-			strcpy(nodotemp->Respuesta,respuesta); 
-			printf("\nCargue ponderacion: ");
-			scanf("%f",&nodotemp->Ponderacion);
-			if (nodotemp->Ponderacion==1) { 
-			  pond=1;
-			}
-			
-            nodotemp->sgte=NULL;
-            if (strcmp(respuesta,"0")!=0) {
-              insertar(&nodotemp,&initemp);
-			}
-			 else { 
-			   free(nodotemp);
-			 }
-            
-		  }
-		   else { 
-		     printf("\n----No hay espacio en memoria----\n");
-		   }
-		}
-		if (pond==1) { 
-		  while(initemp!=NULL) { //sacar nodo de lista temporal para cargarlo en la circular de respuestas
-		    nodotemp=initemp;
-		    initemp=initemp->sgte;
-		    nodotemp->sgte=NULL;
-		    insertarLRes(&nodotemp,&(*iniR));//carga lista circular
-		  }
-		  confirmado=1;
+	while(rc!=NULL) { 
+    	if (rc->EncuestaId==idEnc) { 
+			controlistadopreg=1;
+			rc=NULL;
+		}else{
+			rc=(rc)->sgte;
 		} 
-		 else { 
-		   printf("\nal menos una ponderacion debe ser uno, cargue nuevamente\n")
-		   initemp=borrarlista(initemp)//liberar lista temporal  
-		 } 
-	  }  
-         
-	  } 
-      rc=rc->sgte;
-    }
-     
-     
-     
-    
-   }
-}
-
-void incrementoResid(int *respid, Respuesta *iniR) { 
-  Respuesta *aux;
+  	}
   
-  respid=iniR->RespuestaId
-  aux=iniR->sgte;
-  while(aux!=iniR) { 
-    respid=aux->RespuestaId;
-    aux=(aux)->sgte;
-  }
-   respid++;
+	if (controlistadopreg==0) { 
+		printf("\n----- La encuesta aun no tiene preguntas -----\n");
+	}else{ 
+		rc=aux;
+		aux=NULL;
+	 
+	 	printf("\n----- Listado de preguntas encuesta id --> %d",rc->EncuestaId);
+		while(rc!=NULL) {
+			confirmado=0;
+			respnro=0;
+	  
+			if (rc->EncuestaId==idEnc) { 
+				printf("\n%s\n",rc->Pregunta);
+				pond=0;
+				
+				while (confirmado!=1) {
+					strcpy(respuesta,"1");  
+					while(strcmp(respuesta,"0")!=0) { 
+    
+						nodotemp=(Respuesta*) malloc(sizeof(Respuesta));
+						if (nodotemp!=NULL) { 
+          
+							nodotemp->Activa=0;
+				            nodotemp->PreguntaId=rc->PreguntaId;  
+				            nodotemp->RespuestaId = 0;
+				            respnro++;
+				            nodotemp->RespuestaNro=respnro; 
+               
+				            if (respnro<=2) { 
+				              printf("\nIngrese la respuesta nro %d: ",nodotemp->RespuestaNro);
+				              gets(respuesta);
+							  fflush(stdin);
+							} 
+						    if (respnro>2) { 
+							   printf("\nIngrese la respuesta nro %d o 0 para finalizar: ",nodotemp->RespuestaNro);
+							   gets(respuesta);
+							   fflush(stdin);
+							}
+							strcpy(nodotemp->Respuesta,respuesta); 
+			
+							if(strcmp(respuesta,"0")!=0){
+								printf("\nCargue ponderacion: ");
+								scanf("%f",&nodotemp->Ponderacion);
+								fflush(stdin);
+								
+								if (nodotemp->Ponderacion==1) { 
+									pond=1;
+								}
+								
+					            nodotemp->sgte=NULL;
+								insertarLRes(&nodotemp,&initemp);
+								
+							}else{
+								free(nodotemp);
+							}
+			
+						}else{ 
+							printf("\n----No hay espacio en memoria----\n");
+						}
+					}
+					if (pond==1) { 
+						initemp = cargarListaTemp(initemp, &(*iniR)); //Funcion para cargar nodos de lista temporal a lista circular de Repuestas	
+						confirmado=1;
+					}else{ 
+						printf("\nal menos una ponderacion debe ser uno, cargue nuevamente\n");
+						initemp=borrarlista(initemp); //liberar lista temporal  
+					} 
+				}		  
+	  		} 
+			rc=rc->sgte;
+		}
+	}
 }
 
-Respuesta borrarlista(Respuesta *initemp) { 
+void incrementoResid(int *resId, Respuesta *iniR) { 
+  Respuesta *aux=NULL;
+  if(iniR==NULL){
+  	*resId = 0;
+  }else{
+  	*resId = iniR->RespuestaId;
+	  aux = iniR->sgte;
+	  while(aux!=iniR) { 
+	  	*resId = aux->RespuestaId;
+		aux = aux->sgte;
+		}
+  }
+  
+   (*resId)++;
+}
+
+Respuesta* borrarlista(Respuesta *initemp) { 
   Respuesta *aux=NULL;
   
   while(initemp!=NULL) { 
@@ -160,26 +165,55 @@ Respuesta borrarlista(Respuesta *initemp) {
   
   return(NULL);
 } 
+
+Respuesta* cargarListaTemp(Respuesta *rcTemp, Respuesta **iniRS){
+	Respuesta *aux=NULL, *bor=NULL, *ant=NULL;
+	
+	if(rcTemp!=NULL){
+		ant = rcTemp;
+		rcTemp = rcTemp->sgte;
+		while(rcTemp != ant){
+			aux = rcTemp;
+			rcTemp = rcTemp->sgte;
+			ant->sgte = rcTemp;
+			aux->sgte = NULL;
+			insertarLRes(&aux, &(*iniRS));
+		}
+		if(rcTemp == ant){
+			rcTemp->sgte = NULL;
+			insertarLRes(&rcTemp, &(*iniRS));
+		}
+	}else{
+		printf("No hay nodos en la lista temporal\n");
+	}
+	
+	return (NULL);
+}
  
 void insertarLRes(Respuesta **nodotemp, Respuesta **iniR){ 
   Respuesta *ant;
+  int respId;
   
-  if (iniR==NULL) { 
-    iniR=nodotemp;
-    iniR->sgte=nodotemp;
+  //Actualizo el ultimo IdRespuesta
+  incrementoResid(&respId,*iniR); 
+  (*nodotemp)->RespuestaId = respId;
+  
+  if (*iniR==NULL) { 
+    *iniR = *nodotemp;
+    (*iniR)->sgte= *nodotemp;
   } 
    else { 
-     ant=buscarant(nodotemp->RespuestaId,iniR);
-     nodotemp->sgte=ant->sgte;
-     ant->sgte=nodotemp;
-      if (nodotemp->RespuestaId<iniR->RespuestaId) { 
-        iniR=nodotemp;
+     ant = buscarant((*nodotemp)->RespuestaId, *iniR);
+     (*nodotemp)->sgte = ant->sgte;
+     ant->sgte = *nodotemp;
+      if ((*nodotemp)->RespuestaId < (*iniR)->RespuestaId) { 
+        *iniR= *nodotemp;
 	  }
    }
-  nodotemp=NULL;
+  *nodotemp=NULL;
 } 
 
-Respuesta buscarant(int Respid, Respuesta *rc) { 
+Respuesta* buscarant(int Respid, Respuesta *rc) { 
   Respuesta *ant=NULL, *aux=NULL;
   
   ant=rc;
@@ -203,6 +237,28 @@ Respuesta buscarant(int Respid, Respuesta *rc) {
 	 }
    }
    return(ant);
+}
+
+void ListarLcRespuestas(Respuesta *LCR){
+	Respuesta *aux=NULL;
+	
+	printf("\nPreguntaId: %d\n", LCR->PreguntaId);
+	printf("RespuestaId: %d\n",LCR->RespuestaId);
+	printf("Nro Respuesta: %d\n", LCR->RespuestaNro);
+	printf("Respuesta: %s\n", LCR->Respuesta);
+	printf("Ponderacion: %d\n",LCR->Ponderacion);
+	printf("Activa: %d\n", LCR->Activa);
+	
+	aux = LCR->sgte;
+	while(aux != LCR){
+		printf("\nPreguntaId: %d\n", LCR->PreguntaId);
+		printf("RespuestaId: %d\n",LCR->RespuestaId);
+		printf("Nro Respuesta: %d\n", LCR->RespuestaNro);
+		printf("Respuesta: %s\n", LCR->Respuesta);
+		printf("Ponderacion: %.2f\n",LCR->Ponderacion);
+		printf("Activa: %d\n", LCR->Activa);
+		aux = aux->sgte;
+	}
 }
  
  

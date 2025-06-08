@@ -14,12 +14,14 @@ void altaEncuesta(Encuesta **tope);
 void bajaEncuesta(Encuesta **tope, Pregunta *LPG);
 void bajaPG(Pregunta *ini, int idencuesta, Respuesta *iniRes);
 void BajaRes(int idpregunta, Respuesta *rcRes);
+int ExisteIdEnc(int id, Encuesta **tp);
 
 //Funciones de prueba
 void listarEncuestas();
 void listarPila(Encuesta **tope);
 void controlID(int *ID);
 void listartodapila(Encuesta **tope);
+void listarEncInactivos(Encuesta **tope);
 
 
 // FunciÛn para generar el prÛximo ID disponible
@@ -180,7 +182,7 @@ void listarPila(Encuesta **tope) {
     printf("--------------------------------------------------\n");
 	while(vaciaP(tp2)!=1){
 		desapilar(&p,&tp2);
-		if(p->Activa==1){
+		if((p->Activa==1) && (p->Procesada==0)){
 			printf("%2d | %2d | %4d | %9s | %6s | %s\n",
                p->EncuestaId,
                p->EncuestaMes,
@@ -193,74 +195,99 @@ void listarPila(Encuesta **tope) {
 	}
 }
 
-void bajaEncuesta(Encuesta **tope, Pregunta *LPG){
-	int idBaja;
+void bajaEncuesta(Encuesta **tope, Pregunta *LPG, Respuesta *LRS){
+	int idBaja, encontro=0;
 	Encuesta *p=NULL, *tp2=NULL;
+	
     printf("\n--- Baja de Encuesta ---\n");
     listarPila(&(*tope));
 	controlID(&idBaja);
-    while (!vaciaP(*tope)){
-    	desapilar(&p, &(*tope));
-    	if(p->EncuestaId == idBaja){
-    		p->Activa = 0;
-    		bajaPG(*LPG, idBaja);
+	encontro = ExisteIdEnc(idBaja, &(*tope));
+
+	if(encontro==0){
+		printf("error, no existe el id ingresado\n");
+	}else{
+		while (!vaciaP(*tope)){
+	    	desapilar(&p, &(*tope));
+	    	if(p->EncuestaId == idBaja){
+	    		p->Activa = 0;
+	    		bajaPG(LPG, idBaja, LRS);
+			}
+		apilar(&p, &tp2); // guarda todo temporalmente
 		}
-	apilar(&p, &tp2); // guarda todo temporalmente
+		// restaurar la pila original
+		while (!vaciaP(tp2)) {
+		    desapilar(&p, &tp2);
+		    apilar(&p, &(*tope));
+		}
+	    FILE *archivoOriginal = fopen(ARCHIVO_CSV, "r");
+	    FILE *archivoTemp = fopen(ARCHIVO_TEMP, "w");
+	    
+	    if (archivoOriginal == NULL || archivoTemp == NULL) {
+	        printf("Error al abrir archivos\n");
+	        return;
+	    }
+	    
+	    char linea[256];
+	    int encontrada = 0;
+	    
+	    while (fgets(linea, sizeof(linea), archivoOriginal)) {
+	        Encuesta e;
+	        sscanf(linea, "%d,%d,%d,%d,%d,%[^\n]",
+	               &e.EncuestaId,
+	               &e.EncuestaMes,
+	               &e.EncuestaAnio,
+	               &e.Procesada,
+	               &e.Activa,
+	               e.Denominacion);
+	        
+	        if (e.EncuestaId == idBaja) {
+	            encontrada = 1;
+	            e.Activa = 0; // Marcamos como inactiva
+	            printf("Encuesta ID %d marcada como inactiva\n", idBaja);
+	        }
+	        
+	        // Escribimos en el archivo temporal (todos los registros)
+	        fprintf(archivoTemp, "%d,%d,%d,%d,%d,%s\n",
+	                e.EncuestaId,
+	                e.EncuestaMes,
+	                e.EncuestaAnio,
+	                e.Procesada,
+	                e.Activa,
+	                e.Denominacion);
+	    }
+	    
+	    fclose(archivoOriginal);
+	    fclose(archivoTemp);
+	    
+	    // Reemplazamos el archivo original con el temporal
+	    remove(ARCHIVO_CSV);
+	    rename(ARCHIVO_TEMP, ARCHIVO_CSV);
+	    
+	    if (!encontrada) {
+	        printf("No se encontr√≥ encuesta con ID %d\n", idBaja);
+	    }
 	}
-	// restaurar la pila original
-	while (!vaciaP(tp2)) {
-	    desapilar(&p, &tp2);
-	    apilar(&p, &(*tope));
-	}
-    FILE *archivoOriginal = fopen(ARCHIVO_CSV, "r");
-    FILE *archivoTemp = fopen(ARCHIVO_TEMP, "w");
     
-    if (archivoOriginal == NULL || archivoTemp == NULL) {
-        printf("Error al abrir archivos\n");
-        return;
-    }
-    
-    char linea[256];
-    int encontrada = 0;
-    
-    while (fgets(linea, sizeof(linea), archivoOriginal)) {
-        Encuesta e;
-        sscanf(linea, "%d,%d,%d,%d,%d,%[^\n]",
-               &e.EncuestaId,
-               &e.EncuestaMes,
-               &e.EncuestaAnio,
-               &e.Procesada,
-               &e.Activa,
-               e.Denominacion);
-        
-        if (e.EncuestaId == idBaja) {
-            encontrada = 1;
-            e.Activa = 0; // Marcamos como inactiva
-            printf("Encuesta ID %d marcada como inactiva\n", idBaja);
-        }
-        
-        // Escribimos en el archivo temporal (todos los registros)
-        fprintf(archivoTemp, "%d,%d,%d,%d,%d,%s\n",
-                e.EncuestaId,
-                e.EncuestaMes,
-                e.EncuestaAnio,
-                e.Procesada,
-                e.Activa,
-                e.Denominacion);
-    }
-    
-    fclose(archivoOriginal);
-    fclose(archivoTemp);
-    
-    // Reemplazamos el archivo original con el temporal
-    remove(ARCHIVO_CSV);
-    rename(ARCHIVO_TEMP, ARCHIVO_CSV);
-    
-    if (!encontrada) {
-        printf("No se encontr√≥ encuesta con ID %d\n", idBaja);
-    }
 }
 
+int ExisteIdEnc(int id, Encuesta **tp){
+	Encuesta *p=NULL, *tp2=NULL;
+	int enc=0;
+	
+	while(vaciaP(*tp) != 1){
+		desapilar(&p, &(*tp));
+		if(p->EncuestaId == id){
+			enc=1;
+		}
+		apilar(&p, &tp2);
+	}
+	while(vaciaP(tp2)!=1){
+		desapilar(&p, &tp2);
+		apilar(&p, &(*tp));
+	}
+	return enc;
+}
 //FunciÛn para control de ID
 void controlID(int *ID){
 	int resultado;
@@ -376,7 +403,7 @@ void bajaPG(Pregunta *ini, int idencuesta, Respuesta *iniRes){
     }
 
     // Procesamos cada l√≠nea del archivo
-    while (fgets(linea, sizeof(linea), archivo) {
+    while (fgets(linea, sizeof(linea), archivo)) {
         int preguntaId, encuestaId, ponderacion, activa;
         char pregunta[100];
 
@@ -435,7 +462,7 @@ void BajaRes(int idpregunta, Respuesta *rcRes){
     }
     
     // Procesamos cada l√≠nea del archivo original
-    while (fgets(linea, sizeof(linea), archivoOriginal) {
+    while (fgets(linea, sizeof(linea), archivoOriginal)) {
         int currentPreguntaId, currentRespuestaId, nro, ponderacion, activa;
         char respuesta[50];
         

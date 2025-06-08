@@ -11,10 +11,11 @@ float leerPonderacionValida(float sumaPond);
 Pregunta* insertarPreguntas (Pregunta *nd, Pregunta *r);
 
 void bajaPregunta(Encuesta **tope,Pregunta **ini,Respuesta ** iniC);
-Pregunta borrarPregunta(Pregunta *ini,int idPreg)
+Pregunta* borrarPregunta(Pregunta *ini,int idPreg);
 void borrarRespuestas(int idpre, Respuesta **iniC);
-void buscarborrarRes(int id,Respuesta **rc,Respuesta **ant,int *sn);
-void recorrerResp(Respuesta *iniCir,int idpreg);
+void buscarBorrarRes(int id,Respuesta **rc,Respuesta **ant,int *sn);
+void recorrerResp(Respuesta **iniCir,int idpreg);
+void ListarLESPreguntas(Pregunta *rc);
 
 void bajaPregunta(Encuesta **tope,Pregunta **ini,Respuesta **iniC){
 	int ID = 0,encon = 0;
@@ -26,16 +27,16 @@ void bajaPregunta(Encuesta **tope,Pregunta **ini,Respuesta **iniC){
 		
 		if((*ini)->EncuestaId == ID){
 			if((*ini)->PreguntaId != 0){
-				encon = 1
+				encon = 1;
 				//funcion para borrar respuestas
 				//recorrer la lec
-				recorrerResp(&(*iniC),(*ini->PreguntaId));
+				recorrerResp(&(*iniC),(*ini)->PreguntaId);
 				//funcion borrar
 				*ini = borrarPregunta(*ini,(*ini)->PreguntaId);
 				
 			}
 		}
-		*ini = *ini->sgte;
+		*ini = (*ini)->sgte;
 	}
 	
 	if(encon == 0){
@@ -45,7 +46,7 @@ void bajaPregunta(Encuesta **tope,Pregunta **ini,Respuesta **iniC){
 }
 
 void recorrerResp(Respuesta **iniCir,int idpreg){
-	Respuesta *aux = NULL,aux2 = NULL;
+	Respuesta *aux = NULL, *aux2 = NULL;
 	aux2 = *iniCir;
 	
 	if(aux2->PreguntaId == idpreg){
@@ -66,7 +67,7 @@ void borrarRespuestas(int idpre, Respuesta **iniC){
 	
 	if(*iniC != NULL){
 		bor = *iniC;
-		buscarBorrar(idpre,&bor,&ant,&aBorrar);
+		buscarBorrarRes(idpre,&bor,&ant,&aBorrar);
 			if(bor == *iniC && (*iniC)->PreguntaId == idpre){
 				*iniC = (*iniC)->sgte;
 				aBorrar = 1;
@@ -82,7 +83,7 @@ void borrarRespuestas(int idpre, Respuesta **iniC){
 	
 }
 
-void buscarborrarRes(int id,Respuesta **rc,Respuesta **ant,int *sn){
+void buscarBorrarRes(int id,Respuesta **rc,Respuesta **ant,int *sn){
 	Respuesta *aux = NULL;
 	
 	*ant = *rc;
@@ -91,9 +92,9 @@ void buscarborrarRes(int id,Respuesta **rc,Respuesta **ant,int *sn){
 	while((*rc != aux) && !sn){
 		
 		if((*rc)->PreguntaId == id){
-			sn = 1;
+			*sn = 1;
 		}else{
-			ant = *rc;
+			*ant = *rc;
 			*rc = (*rc)->sgte ;
 		}
 		
@@ -101,7 +102,7 @@ void buscarborrarRes(int id,Respuesta **rc,Respuesta **ant,int *sn){
 	
 }
 
-Pregunta borrarPregunta(Pregunta *ini, int idPreg){
+Pregunta* borrarPregunta(Pregunta *ini, int idPreg){
 	Pregunta *aux = NULL;
 	
 	if(ini != NULL){
@@ -167,6 +168,7 @@ void cargaPreguntas(int encId, Pregunta **inicio) {
         
         
         	pond = leerPonderacionValida(sumaPonderaciones);  
+        
         
         	// Verificar que no exceda el límite al sumar
         	while (sumaPonderaciones + pond > 1.0f) {
@@ -317,6 +319,17 @@ Pregunta* insertarPreguntas (Pregunta *nd, Pregunta *r){
 	}
 	return r;
 }
+
+void ListarLESPreguntas(Pregunta *rc){
+	while(rc!=NULL){
+		printf("EncuestaId: %d \n",rc->EncuestaId);
+		printf("PreguntaId: %d \n",rc->PreguntaId);
+		printf("Pregunta: %s \n",rc->Pregunta);
+		printf("Ponderacion: %f \n", rc->Ponderacion);
+		rc=rc->sgte;
+	}
+}
+
 
 
 
