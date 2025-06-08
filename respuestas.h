@@ -3,10 +3,10 @@
 #include <stdlib.h>
 
 void altaRespuesta(Encuesta **tope, Pregunta *iniP, Respuesta **iniR);
-void listarEncInactivos(Encuesta **tope);
-void listarPreguntasEnc(int idEnc, Pregunta *rc, Respuesta **iniR);
+void CargaRespuestas(int idEnc, Pregunta *rc, Respuesta **iniR);
 void incrementoResid(int *respid, Respuesta *iniR);
 Respuesta* borrarlista(Respuesta *initemp);
+void ActualizarIdRes(Respuesta *rcTmp, Respuesta *iniRes);
 Respuesta* cargarListaTemp(Respuesta *rcTemp, Respuesta **iniRS);
 void insertarLRes(Respuesta **nodotemp, Respuesta **iniR);
 Respuesta* buscarant(int Respid, Respuesta *rc);
@@ -44,9 +44,10 @@ void altaRespuesta(Encuesta **tope, Pregunta *iniP, Respuesta **iniR){
   controlID(&idEnc);
   
   listarPreguntasEnc(idEnc,iniP,&(*iniR));
+  ActivarEncuesta(&(*tope), iniP, *IniR);
 }
 
-void listarPreguntasEnc(int idEnc, Pregunta *rc, Respuesta **iniR){ 
+void CargaRespuestas(int idEnc, Pregunta *rc, Respuesta **iniR){ 
 	Pregunta *aux=NULL;
 	Respuesta *nodotemp=NULL, *initemp=NULL;
 	int controlistadopreg=0, idpregunta,cantidadres=0, confirmado=0,respuestabucle=0, respnro=0,pond=0;
@@ -77,11 +78,10 @@ void listarPreguntasEnc(int idEnc, Pregunta *rc, Respuesta **iniR){
 			if (rc->EncuestaId==idEnc) { 
 				printf("\n%s\n",rc->Pregunta);
 				pond=0;
-				
 				while (confirmado!=1) {
+					printf("Entra al bucle confirmado!=1\n");
 					strcpy(respuesta,"1");  
 					while(strcmp(respuesta,"0")!=0) { 
-    
 						nodotemp=(Respuesta*) malloc(sizeof(Respuesta));
 						if (nodotemp!=NULL) { 
 							nodotemp->Activa=0;
@@ -122,12 +122,15 @@ void listarPreguntasEnc(int idEnc, Pregunta *rc, Respuesta **iniR){
 							printf("\n----No hay espacio en memoria----\n");
 						}
 					}
-					if (pond==1) { 
+					if (pond==1) {
+						ActualizarIdRes(initemp, *iniR); 
 						initemp = cargarListaTemp(initemp, &(*iniR)); //Funcion para cargar nodos de lista temporal a lista circular de Repuestas	
 						confirmado=1;
+						pond=0;
 					}else{ 
 						printf("\nal menos una ponderacion debe ser uno, cargue nuevamente\n");
-						initemp=borrarlista(initemp); //liberar lista temporal  
+						initemp=borrarlista(initemp); //liberar lista temporal 
+						respnro=0;
 					} 
 				}		  
 	  		} 
@@ -164,6 +167,20 @@ Respuesta* borrarlista(Respuesta *initemp){
   	return(NULL);
 } 
 
+void ActualizarIdRes(Respuesta *rcTmp, Respuesta *iniRes){
+	int idx;
+	Respuesta *aux=NULL;
+	
+	incrementoResid(&idx, iniRes);
+	rcTmp->RespuestaId = idx;
+	aux = rcTmp->sgte;
+	while(aux != rcTmp){
+		idx++;
+		aux->RespuestaId = idx;
+		aux = aux->sgte;
+	}
+}
+
 Respuesta* cargarListaTemp(Respuesta *rcTemp, Respuesta **iniRS){
 	Respuesta *aux=NULL, *bor=NULL, *ant=NULL;
 	
@@ -190,12 +207,7 @@ Respuesta* cargarListaTemp(Respuesta *rcTemp, Respuesta **iniRS){
  
 void insertarLRes(Respuesta **nodotemp, Respuesta **iniR){
 	Respuesta *ant;
-	int respId;
-  
-  //Actualizo el ultimo IdRespuesta
-	incrementoResid(&respId,*iniR); 
-	(*nodotemp)->RespuestaId = respId;
-  
+	
   	if (*iniR==NULL) { 
     	*iniR = *nodotemp;
     	(*iniR)->sgte= *nodotemp;
@@ -241,17 +253,17 @@ void ListarLcRespuestas(Respuesta *LCR){
 	printf("RespuestaId: %d\n",LCR->RespuestaId);
 	printf("Nro Respuesta: %d\n", LCR->RespuestaNro);
 	printf("Respuesta: %s\n", LCR->Respuesta);
-	printf("Ponderacion: %d\n",LCR->Ponderacion);
+	printf("Ponderacion: %.2f\n",LCR->Ponderacion);
 	printf("Activa: %d\n", LCR->Activa);
 	
 	aux = LCR->sgte;
 	while(aux != LCR){
-		printf("\nPreguntaId: %d\n", LCR->PreguntaId);
-		printf("RespuestaId: %d\n",LCR->RespuestaId);
-		printf("Nro Respuesta: %d\n", LCR->RespuestaNro);
-		printf("Respuesta: %s\n", LCR->Respuesta);
-		printf("Ponderacion: %.2f\n",LCR->Ponderacion);
-		printf("Activa: %d\n", LCR->Activa);
+		printf("\nPreguntaId: %d\n", aux->PreguntaId);
+		printf("RespuestaId: %d\n",aux->RespuestaId);
+		printf("Nro Respuesta: %d\n", aux->RespuestaNro);
+		printf("Respuesta: %s\n", aux->Respuesta);
+		printf("Ponderacion: %.2f\n",aux->Ponderacion);
+		printf("Activa: %d\n", aux->Activa);
 		aux = aux->sgte;
 	}
 }
