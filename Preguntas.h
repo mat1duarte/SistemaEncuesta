@@ -8,7 +8,7 @@ void cargaPreguntas(int encId, Pregunta **inicio);
 float obtenerSumaPonderacion(int idE, Pregunta *rc);
 int generarIdPregunta(Pregunta *rc);
 float leerPonderacionValida(float sumaPond);
-Pregunta* insertarPreguntas (Pregunta *nd, Pregunta *r);
+Pregunta* insertarPreguntas(Pregunta *nd, Pregunta *r);
 
 void bajaPregunta(Encuesta **tope,Pregunta **ini,Respuesta ** iniC);
 Pregunta* borrarPregunta(Pregunta *ini,int idPreg);
@@ -32,8 +32,7 @@ void bajaPregunta(Encuesta **tope,Pregunta **ini,Respuesta **iniC){
 				//recorrer la lec
 				recorrerResp(&(*iniC),(*ini)->PreguntaId);
 				//funcion borrar
-				*ini = borrarPregunta(*ini,(*ini)->PreguntaId);
-				
+				*ini = borrarPregunta(*ini,(*ini)->PreguntaId);	
 			}
 		}
 		*ini = (*ini)->sgte;
@@ -42,7 +41,6 @@ void bajaPregunta(Encuesta **tope,Pregunta **ini,Respuesta **iniC){
 	if(encon == 0){
 		printf("La Encuesta no tiene preguntas.");
 	}
-	
 }
 
 void recorrerResp(Respuesta **iniCir,int idpreg){
@@ -55,7 +53,7 @@ void recorrerResp(Respuesta **iniCir,int idpreg){
 	aux = aux2->sgte;
 	while(aux != aux2){
 		if(aux->PreguntaId == idpreg){
-		borrarRespuestas(idpreg,&(*iniCir));
+			borrarRespuestas(idpreg,&(*iniCir));
 		}
 		aux = aux->sgte;
 	}
@@ -68,19 +66,18 @@ void borrarRespuestas(int idpre, Respuesta **iniC){
 	if(*iniC != NULL){
 		bor = *iniC;
 		buscarBorrarRes(idpre,&bor,&ant,&aBorrar);
-			if(bor == *iniC && (*iniC)->PreguntaId == idpre){
-				*iniC = (*iniC)->sgte;
-				aBorrar = 1;
-			}
-			if(aBorrar == 1){
-				ant->sgte = bor->sgte;
-				bor->sgte = NULL;
-				free(bor);
-			}else{
-				printf("\nLa pregunta no tiene respuestas.\n");
-			}
-	}
-	
+		if(bor == *iniC && (*iniC)->PreguntaId == idpre){
+			*iniC = (*iniC)->sgte;
+			aBorrar = 1;
+		}
+		if(aBorrar == 1){
+			ant->sgte = bor->sgte;
+			bor->sgte = NULL;
+			free(bor);
+		}else{
+			printf("\nLa pregunta no tiene respuestas.\n");
+		}
+	}	
 }
 
 void buscarBorrarRes(int id,Respuesta **rc,Respuesta **ant,int *sn){
@@ -89,17 +86,14 @@ void buscarBorrarRes(int id,Respuesta **rc,Respuesta **ant,int *sn){
 	*ant = *rc;
 	aux = *rc;
 	*rc = (*rc)->sgte;
-	while((*rc != aux) && !sn){
-		
+	while((*rc != aux) && !sn){		
 		if((*rc)->PreguntaId == id){
 			*sn = 1;
 		}else{
 			*ant = *rc;
 			*rc = (*rc)->sgte ;
 		}
-		
 	}
-	
 }
 
 Pregunta* borrarPregunta(Pregunta *ini, int idPreg){
@@ -122,10 +116,8 @@ Pregunta* borrarPregunta(Pregunta *ini, int idPreg){
 			ini->sgte = borrarPregunta(ini->sgte,ini->PreguntaId);
 		}
 	}
-	
 	return (ini);
 }
-
 
 void altaPregunta(Encuesta **tope, Pregunta **ini){
 	
@@ -135,17 +127,13 @@ void altaPregunta(Encuesta **tope, Pregunta **ini){
 	controlID(&idEnc);
 	
 	cargaPreguntas(idEnc, &(*ini));
-
-	
 }
 
-void cargaPreguntas(int encId, Pregunta **inicio) {
-	
+void cargaPreguntas(int encId, Pregunta **inicio){
 	
     float sumaPonderaciones = 0.0f;
     int auxId; 
     char continuar;
-    
     
     sumaPonderaciones = obtenerSumaPonderacion(encId, *inicio);
     if(sumaPonderaciones>=1){
@@ -166,9 +154,7 @@ void cargaPreguntas(int encId, Pregunta **inicio) {
         	scanf(" %[^\n]", textoPregunta);
         	fflush(stdin);
         
-        
         	pond = leerPonderacionValida(sumaPonderaciones);  
-        
         
         	// Verificar que no exceda el límite al sumar
         	while (sumaPonderaciones + pond > 1.0f) {
@@ -194,7 +180,6 @@ void cargaPreguntas(int encId, Pregunta **inicio) {
 				printf("No hay espacio en memoria\n");
 				return;
 			}
-	        
 	        
 	        // Preguntar si desea continuar (si no ha llegado a 1.0)
 	        if (sumaPonderaciones < 1.0f) {
@@ -223,6 +208,7 @@ void cargaPreguntas(int encId, Pregunta **inicio) {
 
 float obtenerSumaPonderacion(int idE, Pregunta *rc){
 	float aux=0.0f;
+	
 	while(rc!=NULL){
 		if(rc->EncuestaId == idE ){
 			aux = aux + rc->Ponderacion;
@@ -232,7 +218,7 @@ float obtenerSumaPonderacion(int idE, Pregunta *rc){
 	return aux;
 }
 
-int generarIdPregunta(Pregunta *rc) {
+int generarIdPregunta(Pregunta *rc){
     int maxId = 0;
     
     // Buscar el ID más alto en la lista existente
@@ -240,11 +226,10 @@ int generarIdPregunta(Pregunta *rc) {
         maxId = rc->PreguntaId;
         rc = rc->sgte;
     }
-    
     return maxId + 1; // Devolver el siguiente ID disponible
 }
 
-float leerPonderacionValida(float sumaPond) {
+float leerPonderacionValida(float sumaPond){
     char buffer[100];
     float ponderacion = 0.0f;
     int intentos = 0;
@@ -268,7 +253,7 @@ float leerPonderacionValida(float sumaPond) {
         // Verificar caracteres no válidos
         int caracteres_validos = 1;
         for (int i = 0; buffer[i] != '\0' && buffer[i] != '\n'; i++) {
-            if (!isdigit(buffer[i]) && buffer[i] != '.' && buffer[i] != '-') {
+        	if (!isdigit(buffer[i]) && buffer[i] != '.' && buffer[i] != '-') {
                 caracteres_validos = 0;
                 break;
             }
@@ -297,7 +282,7 @@ float leerPonderacionValida(float sumaPond) {
             intentos++;
             continue;
         }
-
+        
         break; // Salir si todo está correcto
 
     } while (intentos < max_intentos);
@@ -310,7 +295,7 @@ float leerPonderacionValida(float sumaPond) {
     return ponderacion;
 }
 
-Pregunta* insertarPreguntas (Pregunta *nd, Pregunta *r){
+Pregunta* insertarPreguntas(Pregunta *nd, Pregunta *r){
 	
 	if(r!=NULL){
 		r->sgte = insertarPreguntas(nd, r->sgte);

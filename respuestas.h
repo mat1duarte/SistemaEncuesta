@@ -15,8 +15,9 @@ void bajaRespuestas(Encuesta **tope, Pregunta *iniP, Respuesta **iniR);
 void listarPreguntas(Pregunta *ini, int idencu);
 void ListarLcRespuestas(Respuesta *);
 
-void bajaRespuestas(Encuesta **tope, Pregunta *iniP, Respuesta **iniR) { 
+void bajaRespuestas(Encuesta **tope, Pregunta *iniP, Respuesta **iniR){ 
   int idEnc=0,idpreg = 0;
+  
   listartodapila(&(*tope));
   controlID(&idEnc);
   
@@ -24,29 +25,28 @@ void bajaRespuestas(Encuesta **tope, Pregunta *iniP, Respuesta **iniR) {
   controlID(&idpreg);
   
   recorrerResp(&(*iniR),idpreg);
-  
-  
 }
 
 void listarPreguntas(Pregunta *ini, int idencu){
+	
 	while(ini != NULL){
 		if(ini->EncuestaId == idencu){
 			printf("ID: %d\n%s",ini->PreguntaId,ini->Pregunta);
 		}
 		ini = ini->sgte;
 	}
-	
 }
 
-void altaRespuesta(Encuesta **tope, Pregunta *iniP, Respuesta **iniR) { 
+void altaRespuesta(Encuesta **tope, Pregunta *iniP, Respuesta **iniR){ 
   int idEnc=0;
+  
   listarEncInactivos(&(*tope));
   controlID(&idEnc);
   
   listarPreguntasEnc(idEnc,iniP,&(*iniR));
 }
 
-void listarPreguntasEnc(int idEnc, Pregunta *rc, Respuesta **iniR) { 
+void listarPreguntasEnc(int idEnc, Pregunta *rc, Respuesta **iniR){ 
 	Pregunta *aux=NULL;
 	Respuesta *nodotemp=NULL, *initemp=NULL;
 	int controlistadopreg=0, idpregunta,cantidadres=0, confirmado=0,respuestabucle=0, respnro=0,pond=0;
@@ -84,7 +84,6 @@ void listarPreguntasEnc(int idEnc, Pregunta *rc, Respuesta **iniR) {
     
 						nodotemp=(Respuesta*) malloc(sizeof(Respuesta));
 						if (nodotemp!=NULL) { 
-          
 							nodotemp->Activa=0;
 				            nodotemp->PreguntaId=rc->PreguntaId;  
 				            nodotemp->RespuestaId = 0;
@@ -137,33 +136,32 @@ void listarPreguntasEnc(int idEnc, Pregunta *rc, Respuesta **iniR) {
 	}
 }
 
-void incrementoResid(int *resId, Respuesta *iniR) { 
-  Respuesta *aux=NULL;
-  if(iniR==NULL){
-  	*resId = 0;
-  }else{
-  	*resId = iniR->RespuestaId;
-	  aux = iniR->sgte;
-	  while(aux!=iniR) { 
-	  	*resId = aux->RespuestaId;
-		aux = aux->sgte;
-		}
-  }
+void incrementoResid(int *resId, Respuesta *iniR){
+	Respuesta *aux=NULL;
   
-   (*resId)++;
+	if(iniR==NULL){
+		*resId = 0;
+ 	}else{
+  		*resId = iniR->RespuestaId;
+	  	aux = iniR->sgte;
+	  	while(aux!=iniR) { 
+	  		*resId = aux->RespuestaId;
+			aux = aux->sgte;
+		}
+  	}
+	(*resId)++;
 }
 
-Respuesta* borrarlista(Respuesta *initemp) { 
-  Respuesta *aux=NULL;
+Respuesta* borrarlista(Respuesta *initemp){
+	Respuesta *aux=NULL;
   
-  while(initemp!=NULL) { 
-    aux=initemp;
-    initemp=initemp->sgte;
-    aux->sgte=NULL;
-    free(aux);
-  }
-  
-  return(NULL);
+	while(initemp!=NULL) { 
+   		aux=initemp;
+    	initemp=initemp->sgte;
+    	aux->sgte=NULL;
+    	free(aux);
+  	}
+  	return(NULL);
 } 
 
 Respuesta* cargarListaTemp(Respuesta *rcTemp, Respuesta **iniRS){
@@ -190,53 +188,50 @@ Respuesta* cargarListaTemp(Respuesta *rcTemp, Respuesta **iniRS){
 	return (NULL);
 }
  
-void insertarLRes(Respuesta **nodotemp, Respuesta **iniR){ 
-  Respuesta *ant;
-  int respId;
+void insertarLRes(Respuesta **nodotemp, Respuesta **iniR){
+	Respuesta *ant;
+	int respId;
   
   //Actualizo el ultimo IdRespuesta
-  incrementoResid(&respId,*iniR); 
-  (*nodotemp)->RespuestaId = respId;
+	incrementoResid(&respId,*iniR); 
+	(*nodotemp)->RespuestaId = respId;
   
-  if (*iniR==NULL) { 
-    *iniR = *nodotemp;
-    (*iniR)->sgte= *nodotemp;
-  } 
-   else { 
-     ant = buscarant((*nodotemp)->RespuestaId, *iniR);
-     (*nodotemp)->sgte = ant->sgte;
-     ant->sgte = *nodotemp;
-      if ((*nodotemp)->RespuestaId < (*iniR)->RespuestaId) { 
-        *iniR= *nodotemp;
-	  }
-   }
-  *nodotemp=NULL;
+  	if (*iniR==NULL) { 
+    	*iniR = *nodotemp;
+    	(*iniR)->sgte= *nodotemp;
+  	}else{ 
+    	ant = buscarant((*nodotemp)->RespuestaId, *iniR);
+     	(*nodotemp)->sgte = ant->sgte;
+     	ant->sgte = *nodotemp;
+      	if ((*nodotemp)->RespuestaId < (*iniR)->RespuestaId) { 
+        	*iniR= *nodotemp;
+	  	}
+   	}
+  	*nodotemp=NULL;
 } 
 
-Respuesta* buscarant(int Respid, Respuesta *rc) { 
-  Respuesta *ant=NULL, *aux=NULL;
+Respuesta* buscarant(int Respid, Respuesta *rc){
+	Respuesta *ant=NULL, *aux=NULL;
   
-  ant=rc;
-  aux=rc->sgte;
+ 	ant=rc;
+  	aux=rc->sgte;
   
-  if (rc->RespuestaId>Respid) { 
-    while(aux!=rc) { 
-      ant=aux;
-      aux=aux->sgte;
-	}
-  }
-   else { 
-     while(aux!=rc) { 
-       if (aux->RespuestaId>Respid) {
-       	 aux=rc;
-	   } 
-	    else { 
-	      ant=aux;
-	      aux=aux->sgte;
+  	if (rc->RespuestaId>Respid) { 
+    	while(aux!=rc) { 
+      		ant=aux;
+      		aux=aux->sgte;
 		}
-	 }
-   }
-   return(ant);
+  	}else{ 
+    	while(aux!=rc) { 
+    		if (aux->RespuestaId>Respid) {
+       	 		aux=rc;
+	   		}else{ 
+	      		ant=aux;
+	      		aux=aux->sgte;
+			}
+	 	}
+   	}
+   	return(ant);
 }
 
 void ListarLcRespuestas(Respuesta *LCR){
