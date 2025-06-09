@@ -43,8 +43,8 @@ void altaRespuesta(Encuesta **tope, Pregunta *iniP, Respuesta **iniR){
   listarEncInactivos(&(*tope));
   controlID(&idEnc);
   
-  listarPreguntasEnc(idEnc,iniP,&(*iniR));
-  ActivarEncuesta(&(*tope), iniP, *IniR);
+  CargaRespuestas(idEnc,iniP,&(*iniR));
+  //ActivarEncuesta(&(*tope), iniP, *IniR);
 }
 
 void CargaRespuestas(int idEnc, Pregunta *rc, Respuesta **iniR){ 

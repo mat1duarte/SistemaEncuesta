@@ -73,7 +73,8 @@ int vaciaP(Encuesta *top){
 void altaEncuesta(Encuesta **tope){
     Encuesta nueva;
     FILE *archivo;
-    
+    char mes[10], anio[10];
+	int control=0, controlanio=0;
     // Generar ID automáticamente
     nueva.EncuestaId = generarNuevoId();
     
@@ -87,11 +88,36 @@ void altaEncuesta(Encuesta **tope){
     printf("Ingrese la denominacion: ");
     scanf(" %[^\n]", nueva.Denominacion);
     
-    printf("Ingrese el mes (1-12): ");
-    scanf("%d", &nueva.EncuestaMes);
-    
-    printf("Ingrese el anio: ");
-    scanf("%d", &nueva.EncuestaAnio);
+    fflush(stdin);
+    while (control==0){
+		control=0;
+		printf("Ingrese el mes (01-12): ");
+		gets(mes);
+		if(strlen(mes)==2){
+			if((mes[0]=='0' && (mes[1]>='1' && mes[1]<='9')) || (mes[0]=='1' && (mes[1]>='0' && mes[1]<='2')) /*&& fecha[7]=='/'*/){
+				control=1;
+			} 
+		}
+		if (control==0){
+			printf("\nerror\n");
+		} 
+	}
+	strcpy(nueva.EncuestaMes, mes);
+	
+	while (controlanio==0){
+		controlanio=0;
+		printf("Ingrese el anio: ");
+		gets(anio);
+		if(strlen(anio)==4){
+			if(anio[0]=='2' && anio[1]=='0' && anio[2]>='2' && anio[3]>='5'){
+				controlanio=1;
+			}
+		}
+		if (controlanio==0){
+			printf("\nerror\n");
+		} 
+	}
+	strcpy(nueva.EncuestaAnio, anio);
     
     // Abrir archivo en modo append (añadir al final)
     archivo = fopen(ARCHIVO_CSV, "a");
@@ -105,8 +131,8 @@ void altaEncuesta(Encuesta **tope){
     	strcpy(n->Denominacion,nueva.Denominacion);
     	n->Activa = nueva.Activa;
     	n->Procesada = nueva.Procesada;
-    	n->EncuestaAnio = nueva.EncuestaAnio;
-    	n->EncuestaMes = nueva.EncuestaMes;
+    	strcpy(n->EncuestaAnio, nueva.EncuestaAnio);
+    	strcpy(n->EncuestaMes, nueva.EncuestaMes);
     	n->EncuestaId = nueva.EncuestaId;
     	n->sgte = NULL;
     	
@@ -120,7 +146,7 @@ void altaEncuesta(Encuesta **tope){
 		}*/
     
     // Escribir los datos en formato CSV
-    fprintf(archivo, "%d,%d,%d,%d,%d,%s\n",
+    fprintf(archivo, "%d,%s,%s,%d,%d,%s\n",
 		nueva.EncuestaId,
 	    nueva.EncuestaMes,
 	    nueva.EncuestaAnio,
@@ -147,7 +173,7 @@ void listarEncuestas(){
     char linea[256];
     while (fgets(linea, sizeof(linea), archivo)) {
 		Encuesta e;
-        sscanf(linea, "%d,%d,%d,%d,%d,%[^\n]",
+        sscanf(linea, "%d,%s,%s,%d,%d,%[^\n]",
 			&e.EncuestaId,
             &e.EncuestaMes,
             &e.EncuestaAnio,
@@ -155,7 +181,7 @@ void listarEncuestas(){
             &e.Activa,
             e.Denominacion);
         
-        printf("%2d | %2d | %4d | %9s | %6s | %s\n",
+        printf("%2d | %2s | %4s | %9s | %6s | %s\n",
 			e.EncuestaId,
             e.EncuestaMes,
             e.EncuestaAnio,
@@ -181,7 +207,7 @@ void listarPila(Encuesta **tope){
 	while(vaciaP(tp2)!=1){
 		desapilar(&p,&tp2);
 		if((p->Activa==1) && (p->Procesada==0)){
-			printf("%2d | %2d | %4d | %9s | %6s | %s\n",
+			printf("%2d | %2s | %4s | %9s | %6s | %s\n",
 				p->EncuestaId,
 				p->EncuestaMes,
 				p->EncuestaAnio,
@@ -231,7 +257,7 @@ void bajaEncuesta(Encuesta **tope, Pregunta *LPG, Respuesta *LRS){
 	    
 	    while (fgets(linea, sizeof(linea), archivoOriginal)) {
 			Encuesta e;
-	        sscanf(linea, "%d,%d,%d,%d,%d,%[^\n]",
+	        sscanf(linea, "%d,%s,%s,%d,%d,%[^\n]",
 				&e.EncuestaId,
 	            &e.EncuestaMes,
 	            &e.EncuestaAnio,
@@ -246,7 +272,7 @@ void bajaEncuesta(Encuesta **tope, Pregunta *LPG, Respuesta *LRS){
 	        }
 	        
 	        // Escribimos en el archivo temporal (todos los registros)
-	        fprintf(archivoTemp, "%d,%d,%d,%d,%d,%s\n",
+	        fprintf(archivoTemp, "%d,%s,%s,%d,%d,%s\n",
 				e.EncuestaId,
 	            e.EncuestaMes,
 	            e.EncuestaAnio,
@@ -334,7 +360,7 @@ void listartodapila(Encuesta **tope){
     printf("--------------------------------------------------\n");
 	while(vaciaP(tp2)!=1){
 		desapilar(&p,&tp2);
-		printf("%2d | %2d | %4d | %9s | %6s | %s\n",
+		printf("%2d | %2s | %4s | %9s | %6s | %s\n",
         	p->EncuestaId,
             p->EncuestaMes,
             p->EncuestaAnio,
@@ -360,7 +386,7 @@ void listarEncInactivos(Encuesta **tope){
 	while(vaciaP(tp2)!=1){
 		desapilar(&p,&tp2);
 		if(p->Activa==0){
-			printf("%2d | %2d | %4d | %9s | %6s | %s\n",
+			printf("%2d | %2s | %4s | %9s | %6s | %s\n",
             	p->EncuestaId,
             	p->EncuestaMes,
             	p->EncuestaAnio,

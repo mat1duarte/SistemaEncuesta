@@ -80,7 +80,7 @@ void menuEncuesta(Encuesta **top, Pregunta *LPreg, Respuesta *LRes){
 		printf("3- Listar Encuestas.csv.\n");
 		printf("4- Listar pila Encuestas\n");
 		printf("0- Volver.\n");
-		
+			
 		fflush(stdin);
 		scanf("%c", &op);
 		printf("\n");

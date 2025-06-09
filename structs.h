@@ -3,8 +3,8 @@
 #include<string.h>
 
 typedef struct Encuesta{
-	int EncuestaId, EncuestaMes, EncuestaAnio, Procesada, Activa;
-	char Denominacion[50];
+	int EncuestaId, Procesada, Activa;
+	char Denominacion[50], EncuestaMes[10], EncuestaAnio[10];
 	struct Encuesta *sgte;
 }Encuesta;
 
