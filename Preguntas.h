@@ -10,126 +10,18 @@ int generarIdPregunta(Pregunta *rc);
 float leerPonderacionValida(float sumaPond);
 Pregunta* insertarPreguntas(Pregunta *nd, Pregunta *r);
 
-void bajaPregunta(Encuesta **tope,Pregunta **ini,Respuesta ** iniC);
-Pregunta* borrarPregunta(Pregunta *ini,int idPreg);
-void borrarRespuestas(int idpre, Respuesta **iniC);
-void buscarBorrarRes(int id,Respuesta **rc,Respuesta **ant,int *sn);
-int recorrerResp(Respuesta **iniCir,int idpreg);
+void bajaPregunta(Encuesta **tope, Pregunta **iniP, Respuesta **iniR);
+int recorrerLESPreg(int idEncuesta, Pregunta ** iniPr, Respuesta **iniResp);
+void borrarPregunta(int idPREG, Pregunta **iniPREG);
+void buscarBorrarP(int idP, Pregunta **rc, Pregunta **ant);
+int RecorrerLCRes(int idPreg, Respuesta **iniRes);
+void borrarRespuesta(int idPrg, Respuesta **iniRs);
+void buscarBorrarR(int idP, Respuesta **rc, Respuesta **ant, int *encontrado);
+
+
 void ListarLESPreguntas(Pregunta *rc);
 
-void bajaPregunta(Encuesta **tope,Pregunta **ini,Respuesta **iniC){
-	int ID = 0,encon = 0;
-	
-	listartodapila(&(*tope));
-	controlID(&ID);
-	
-	Pregunta *rcPreg = *ini;
-	while(rcPreg != NULL){
-		printf("Entra while rcPreg !=NULL\n");
-		if(rcPreg->EncuestaId == ID){
-			if(rcPreg->PreguntaId != 0){
-				int band=0;
-				encon = 1;
-				//funcion para borrar respuestas
-				//recorrer la lec
-				if(*iniC != NULL){
-					do{
-						band = recorrerResp(&(*iniC),rcPreg->PreguntaId);
-					}while(band!=1);		
-				}
-				//funcion borrar
-				*ini = borrarPregunta(*ini,rcPreg->PreguntaId);
-			}
-		}
-		rcPreg = rcPreg->sgte;
-	}
-	printf("Sale del while rcPreg !=NULL\n");
-	if(encon == 0){
-		printf("La Encuesta no tiene preguntas.");
-	}
-}
 
-int recorrerResp(Respuesta **iniCir,int idpreg){
-	Respuesta *aux = NULL, *aux2 = NULL;
-	aux2 = *iniCir;
-	printf("Entra al recorrer respuestas\n");
-	if(aux2->PreguntaId == idpreg){
-		borrarRespuestas(idpreg,&(*iniCir));
-		return 0;
-	}
-	aux = aux2->sgte;
-	while(aux != aux2){
-		if(aux->PreguntaId == idpreg){
-			borrarRespuestas(idpreg,&(*iniCir));
-			return 0;
-		}
-		aux = aux->sgte;
-	}
-	
-	return 1;
-}
-
-void borrarRespuestas(int idpre, Respuesta **iniC){
-	Respuesta *ant= NULL,*bor= NULL;
-	int aBorrar;
-	printf("Entra al borrar respuestas\n");
-	if(*iniC != NULL){
-		bor = *iniC;
-		aBorrar = 0;
-		
-		buscarBorrarRes(idpre,&bor,&ant,&aBorrar);
-		if((bor == *iniC) && ((*iniC)->PreguntaId == idpre)){
-			*iniC = (*iniC)->sgte;
-			aBorrar = 1;
-		}
-		if(aBorrar == 1){
-			ant->sgte = bor->sgte;
-			bor->sgte = NULL;
-			free(bor);
-		}else{
-			printf("\nLa pregunta no tiene respuestas.\n");
-		}
-	}	
-}
-
-void buscarBorrarRes(int id,Respuesta **rc,Respuesta **ant,int *sn){
-	Respuesta *aux = NULL;
-	
-	*ant = *rc;
-	aux = *rc;
-	*rc = (*rc)->sgte;
-	while((*rc != aux) && (!(*sn))){		
-		if((*rc)->PreguntaId == id){
-			*sn = 1;
-		}else{
-			*ant = *rc;
-			*rc = (*rc)->sgte ;
-		}
-	}
-}
-
-Pregunta* borrarPregunta(Pregunta *ini, int idPreg){
-	Pregunta *aux = NULL;
-	
-	if(ini != NULL){
-		
-		if(ini->PreguntaId == idPreg){
-			
-			if(ini->sgte == NULL){
-				aux = ini;
-				ini = NULL;
-				free(aux);
-			}else{
-				aux = ini;
-				ini = ini->sgte;
-				free(aux);
-			}
-		}else{
-			ini->sgte = borrarPregunta(ini->sgte, idPreg);
-		}
-	}
-	return (ini);
-}
 
 void altaPregunta(Encuesta **tope, Pregunta **ini){
 	
@@ -315,6 +207,137 @@ Pregunta* insertarPreguntas(Pregunta *nd, Pregunta *r){
 		r = nd;
 	}
 	return r;
+}
+
+void bajaPregunta(Encuesta **tope, Pregunta **iniP, Respuesta **iniR){
+	int idEnc, fin=0;
+	Pregunta *rcPr = NULL;
+	
+	listarEncNoProc(&(*tope));
+  	controlID(&idEnc);
+  	
+  		do{
+  			fin = recorrerLESPreg(idEnc, &(*iniP), &(*iniR));
+		  }while(fin != 1);
+}
+
+int recorrerLESPreg(int idEncuesta, Pregunta ** iniPr, Respuesta **iniResp){
+	Pregunta *rcPr=NULL;
+	int finalizar=0;
+	
+	rcPr = *iniPr;
+	while(rcPr != NULL){
+		if(rcPr->EncuestaId == idEncuesta){		
+			do{
+				finalizar = RecorrerLCRes(rcPr->PreguntaId, &(*iniResp));
+			}while(finalizar != 1);
+					 
+				borrarPregunta(rcPr->PreguntaId, &(*iniPr));
+				return 0;
+		}
+	rcPr = rcPr->sgte;
+	}
+	
+	return 1;
+}
+
+void borrarPregunta(int idPREG, Pregunta **iniPREG){
+	Pregunta *ant=NULL, *bor=NULL;
+	
+	bor = *iniPREG;
+	buscarBorrarP(idPREG, &bor, &ant);
+	if(bor != NULL){
+		if(ant == NULL){
+			*iniPREG = (*iniPREG)->sgte;
+		}else{
+			ant->sgte = bor->sgte;
+		}
+		bor->sgte = NULL;
+		free(bor);
+	}else{
+		printf("EL idPregunta %d (nodo) no esta en la lista\n", idPREG);
+	}
+}
+
+void buscarBorrarP(int idP, Pregunta **rc, Pregunta **ant){
+	int encontrado;
+	
+	*ant = NULL;
+	encontrado = 0;
+	
+	while((*rc != NULL) && (!encontrado)){
+		if((*rc)->PreguntaId == idP){
+			encontrado = 1;
+		}else{
+			*ant = *rc;
+			*rc = (*rc)->sgte;
+		}
+	}
+}
+
+int RecorrerLCRes(int idPreg, Respuesta **iniRes){
+	if(*iniRes == NULL) return 1;
+	
+	Respuesta *aux=NULL, *rcRes=NULL;
+	
+		aux = *iniRes;
+		rcRes = *iniRes;
+	
+		if(rcRes->PreguntaId == idPreg){
+			borrarRespuesta(idPreg, &(*iniRes));
+			return 0;
+		}
+		aux = rcRes->sgte;
+		while(aux != rcRes){
+			if(aux->PreguntaId == idPreg){
+				borrarRespuesta(idPreg, &(*iniRes));
+				return 0;
+			}
+			aux = aux->sgte;
+		}
+		
+		return 1;
+}
+
+void borrarRespuesta(int idPrg, Respuesta **iniRs){
+	if(*iniRs == NULL) return; 
+	
+	Respuesta *ant=NULL, *bor=NULL;
+	int aBorrar;
+	
+	if(*iniRs != NULL){
+		bor = *iniRs;
+		aBorrar = 0;
+		buscarBorrarR(idPrg, &bor, &ant, &aBorrar);
+		if((bor == *iniRs) && ((*iniRs)->PreguntaId == idPrg)){
+			*iniRs = (*iniRs)->sgte;
+			aBorrar = 1;
+		}
+		if(aBorrar == 1){
+			ant->sgte = bor->sgte;
+			bor->sgte = NULL;
+			
+			free(bor);
+		}else{
+			printf("EL idPregunta: %d (nodo )no esta en la lista\n", idPrg);
+		}
+	}
+}
+
+void buscarBorrarR(int idP, Respuesta **rc, Respuesta **ant, int *encontrado){
+	Respuesta *aux=NULL;
+	
+	*ant = *rc;
+	aux = *rc;
+	*rc = (*rc)->sgte;
+	while((*rc != aux) && (!(*encontrado))){
+		if((*rc)->PreguntaId == idP){
+			*encontrado = 1;
+		}else{
+			*ant = *rc;
+			*rc = (*rc)->sgte;
+		}
+	} 
 }
 
 void ListarLESPreguntas(Pregunta *rc){

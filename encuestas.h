@@ -22,6 +22,7 @@ void listarPila(Encuesta **tope);
 void controlID(int *ID);
 void listartodapila(Encuesta **tope);
 void listarEncInactivos(Encuesta **tope);
+void listarEncNoProc(Encuesta **tope);
 
 
 // Función para generar el próximo ID disponible
@@ -511,5 +512,32 @@ void BajaRes(int idpregunta, Respuesta *rcRes){
     // Reemplazamos el archivo original con el temporal
     remove("preguntas.csv");
     rename(tempFilename, "preguntas.csv");
+}
+
+//Funcion para listar encuestas no procesadas
+void listarEncNoProc(Encuesta **tope){
+	
+	Encuesta *p=NULL, *tp2=NULL;
+	
+	while(vaciaP(*tope)!=1){
+		desapilar(&p, &(*tope));
+		apilar(&p,&tp2);
+	}
+	printf("\n--- Listado de Encuestas ---\n");
+    printf("ID | Mes | Año | Procesada | Activa | Denominacion\n");
+    printf("--------------------------------------------------\n");
+	while(vaciaP(tp2)!=1){
+		desapilar(&p,&tp2);
+		if((p->Procesada==0)){
+			printf("%2d | %2s | %4s | %9s | %6s | %s\n",
+				p->EncuestaId,
+				p->EncuestaMes,
+				p->EncuestaAnio,
+				p->Procesada ? "Si" : "No",
+				p->Activa ? "Si" : "No",
+				p->Denominacion);
+        }
+        apilar(&p,&(*tope));
+	}
 }
 

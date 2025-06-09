@@ -19,22 +19,25 @@ void evaluarBanderas(int *cont, int bandP, int bandR);
 void ActivarEncuesta(Encuesta **tpE, int idEncuesta);
 
 void bajaRespuestas(Encuesta **tope, Pregunta *iniP, Respuesta **iniR){ 
-  int idEnc=0,idpreg = 0;
+  int idEnc=0,idpreg = 0, finalizar=0;
   
-  listartodapila(&(*tope));
+  listarEncNoProc(&(*tope));
   controlID(&idEnc);
   
   listarPreguntas(iniP,idEnc);
+  printf("\nIngrese el ID de la pregunta cuyas respuestas desea eliminar: ");
   controlID(&idpreg);
   
-  recorrerResp(&(*iniR),idpreg);
+  do{
+		finalizar = RecorrerLCRes(idpreg, &(*iniR));
+	}while(finalizar != 1);
 }
 
 void listarPreguntas(Pregunta *ini, int idencu){
 	
 	while(ini != NULL){
 		if(ini->EncuestaId == idencu){
-			printf("ID: %d\n%s",ini->PreguntaId,ini->Pregunta);
+			printf("\nID: %d\n%s",ini->PreguntaId,ini->Pregunta);
 		}
 		ini = ini->sgte;
 	}
