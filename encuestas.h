@@ -325,7 +325,7 @@ void controlID(int *ID){
         // Validación de entrada numérica
         while (resultado != 1) {
             while (getchar() != '\n'); // Limpia el buffer
-            printf("Entrada inválida. Ingrese un número entero para el ID: ");
+            printf("Entrada invalida. Ingrese un numero entero para el ID: ");
             resultado = scanf("%d", &(*ID));
         }
 
@@ -333,7 +333,7 @@ void controlID(int *ID){
         while (getchar() != '\n');
 
         // Confirmación del ID
-        printf("¿Está seguro de que el ID ingresado es correcto? (s/n): ");
+        printf("¿Esta seguro de que el ID ingresado es correcto? (s/n): ");
         scanf("%c", &confirmacion);
 		
         // Limpia el buffer por si hay más caracteres

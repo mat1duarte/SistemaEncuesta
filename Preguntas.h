@@ -14,7 +14,7 @@ void bajaPregunta(Encuesta **tope,Pregunta **ini,Respuesta ** iniC);
 Pregunta* borrarPregunta(Pregunta *ini,int idPreg);
 void borrarRespuestas(int idpre, Respuesta **iniC);
 void buscarBorrarRes(int id,Respuesta **rc,Respuesta **ant,int *sn);
-void recorrerResp(Respuesta **iniCir,int idpreg);
+int recorrerResp(Respuesta **iniCir,int idpreg);
 void ListarLESPreguntas(Pregunta *rc);
 
 void bajaPregunta(Encuesta **tope,Pregunta **ini,Respuesta **iniC){
@@ -23,50 +23,62 @@ void bajaPregunta(Encuesta **tope,Pregunta **ini,Respuesta **iniC){
 	listartodapila(&(*tope));
 	controlID(&ID);
 	
-	while(*ini != NULL){
-		
-		if((*ini)->EncuestaId == ID){
-			if((*ini)->PreguntaId != 0){
+	Pregunta *rcPreg = *ini;
+	while(rcPreg != NULL){
+		printf("Entra while rcPreg !=NULL\n");
+		if(rcPreg->EncuestaId == ID){
+			if(rcPreg->PreguntaId != 0){
+				int band=0;
 				encon = 1;
 				//funcion para borrar respuestas
 				//recorrer la lec
-				recorrerResp(&(*iniC),(*ini)->PreguntaId);
+				if(*iniC != NULL){
+					do{
+						band = recorrerResp(&(*iniC),rcPreg->PreguntaId);
+					}while(band!=1);		
+				}
 				//funcion borrar
-				*ini = borrarPregunta(*ini,(*ini)->PreguntaId);	
+				*ini = borrarPregunta(*ini,rcPreg->PreguntaId);
 			}
 		}
-		*ini = (*ini)->sgte;
+		rcPreg = rcPreg->sgte;
 	}
-	
+	printf("Sale del while rcPreg !=NULL\n");
 	if(encon == 0){
 		printf("La Encuesta no tiene preguntas.");
 	}
 }
 
-void recorrerResp(Respuesta **iniCir,int idpreg){
+int recorrerResp(Respuesta **iniCir,int idpreg){
 	Respuesta *aux = NULL, *aux2 = NULL;
 	aux2 = *iniCir;
-	
+	printf("Entra al recorrer respuestas\n");
 	if(aux2->PreguntaId == idpreg){
 		borrarRespuestas(idpreg,&(*iniCir));
+		return 0;
 	}
 	aux = aux2->sgte;
 	while(aux != aux2){
 		if(aux->PreguntaId == idpreg){
 			borrarRespuestas(idpreg,&(*iniCir));
+			return 0;
 		}
 		aux = aux->sgte;
 	}
+	
+	return 1;
 }
 
 void borrarRespuestas(int idpre, Respuesta **iniC){
 	Respuesta *ant= NULL,*bor= NULL;
-	int aBorrar = 0;
-	
+	int aBorrar;
+	printf("Entra al borrar respuestas\n");
 	if(*iniC != NULL){
 		bor = *iniC;
+		aBorrar = 0;
+		
 		buscarBorrarRes(idpre,&bor,&ant,&aBorrar);
-		if(bor == *iniC && (*iniC)->PreguntaId == idpre){
+		if((bor == *iniC) && ((*iniC)->PreguntaId == idpre)){
 			*iniC = (*iniC)->sgte;
 			aBorrar = 1;
 		}
@@ -86,7 +98,7 @@ void buscarBorrarRes(int id,Respuesta **rc,Respuesta **ant,int *sn){
 	*ant = *rc;
 	aux = *rc;
 	*rc = (*rc)->sgte;
-	while((*rc != aux) && !sn){		
+	while((*rc != aux) && (!(*sn))){		
 		if((*rc)->PreguntaId == id){
 			*sn = 1;
 		}else{
@@ -113,7 +125,7 @@ Pregunta* borrarPregunta(Pregunta *ini, int idPreg){
 				free(aux);
 			}
 		}else{
-			ini->sgte = borrarPregunta(ini->sgte,ini->PreguntaId);
+			ini->sgte = borrarPregunta(ini->sgte, idPreg);
 		}
 	}
 	return (ini);
@@ -306,13 +318,18 @@ Pregunta* insertarPreguntas(Pregunta *nd, Pregunta *r){
 }
 
 void ListarLESPreguntas(Pregunta *rc){
-	while(rc!=NULL){
-		printf("EncuestaId: %d \n",rc->EncuestaId);
-		printf("PreguntaId: %d \n",rc->PreguntaId);
-		printf("Pregunta: %s \n",rc->Pregunta);
-		printf("Ponderacion: %f \n", rc->Ponderacion);
-		rc=rc->sgte;
-	}
+	
+	if(rc==NULL){
+		printf("No hay preguntas existentes\n");
+	}else{
+		while(rc!=NULL){
+			printf("EncuestaId: %d \n",rc->EncuestaId);
+			printf("PreguntaId: %d \n",rc->PreguntaId);
+			printf("Pregunta: %s \n",rc->Pregunta);
+			printf("Ponderacion: %f \n", rc->Ponderacion);
+			rc=rc->sgte;
+		}
+	}	
 }
 
 

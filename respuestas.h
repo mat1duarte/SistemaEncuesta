@@ -14,6 +14,9 @@ Respuesta* buscarant(int Respid, Respuesta *rc);
 void bajaRespuestas(Encuesta **tope, Pregunta *iniP, Respuesta **iniR);
 void listarPreguntas(Pregunta *ini, int idencu);
 void ListarLcRespuestas(Respuesta *);
+void VerificarEncuesta(int idEcta, Encuesta **tpEnc, Pregunta *rcP, Respuesta *rcRsp);
+void evaluarBanderas(int *cont, int bandP, int bandR);
+void ActivarEncuesta(Encuesta **tpE, int idEncuesta);
 
 void bajaRespuestas(Encuesta **tope, Pregunta *iniP, Respuesta **iniR){ 
   int idEnc=0,idpreg = 0;
@@ -44,7 +47,7 @@ void altaRespuesta(Encuesta **tope, Pregunta *iniP, Respuesta **iniR){
   controlID(&idEnc);
   
   CargaRespuestas(idEnc,iniP,&(*iniR));
-  //ActivarEncuesta(&(*tope), iniP, *IniR);
+  VerificarEncuesta(idEnc, &(*tope), iniP, *iniR);
 }
 
 void CargaRespuestas(int idEnc, Pregunta *rc, Respuesta **iniR){ 
@@ -79,7 +82,6 @@ void CargaRespuestas(int idEnc, Pregunta *rc, Respuesta **iniR){
 				printf("\n%s\n",rc->Pregunta);
 				pond=0;
 				while (confirmado!=1) {
-					printf("Entra al bucle confirmado!=1\n");
 					strcpy(respuesta,"1");  
 					while(strcmp(respuesta,"0")!=0) { 
 						nodotemp=(Respuesta*) malloc(sizeof(Respuesta));
@@ -267,5 +269,78 @@ void ListarLcRespuestas(Respuesta *LCR){
 		aux = aux->sgte;
 	}
 }
- 
- 
+
+void VerificarEncuesta(int idEcta, Encuesta **tpEnc, Pregunta *rcP, Respuesta *rcRsp){
+	int contPreg=0, bandPreg=0, bandRes=0, contFinal=0;
+	Pregunta *auxPreg=NULL;
+	Respuesta *auxRes=NULL, *aux=NULL;
+	
+	auxPreg = rcP;
+	while(rcP != NULL){
+		if(rcP->EncuestaId == idEcta){
+			contPreg= contPreg +1;
+		}
+		rcP = rcP->sgte;
+	}
+	
+	rcP = auxPreg;
+	auxPreg = NULL;
+	
+	while(rcP != NULL){
+		bandPreg=0;
+		bandRes=0;
+		
+		if(rcP->EncuestaId == idEcta){
+			bandPreg=1;
+			
+			auxRes = rcRsp;
+			if(rcRsp->PreguntaId == rcP->PreguntaId){
+				bandRes = 1;
+			}
+			aux = rcRsp->sgte;
+			while(aux != rcRsp){
+				if(aux->PreguntaId == rcP->PreguntaId){
+					bandRes = 1;
+				}
+				aux = aux->sgte;
+			}
+			
+			evaluarBanderas(&contFinal,bandPreg,bandRes);
+			
+			rcRsp = auxRes;
+			auxRes = NULL;	
+		}
+		rcP = rcP->sgte;
+	}
+	
+	if(contPreg == contFinal){
+		//ActivarEncuesta
+		ActivarEncuesta(&(*tpEnc), idEcta);
+	}else{
+		printf("La encuesta está incompleta\n");
+	}
+}
+
+void evaluarBanderas(int *cont, int bandP, int bandR){
+	
+	if(bandP==1 && bandR==1){
+		*cont = *cont + 1;
+	}
+}
+
+void ActivarEncuesta(Encuesta **tpE, int idEncuesta){
+	Encuesta *p=NULL, *tp2=NULL;
+	
+	while(vaciaP(*tpE) != 1){
+		desapilar(&p,&(*tpE));
+		if(p->EncuestaId == idEncuesta){
+			p->Activa = 1; //Activa Encuesta dada de alta
+		}
+		apilar(&p,&tp2);	
+	}
+	
+	while(vaciaP(tp2) != 1){
+		desapilar(&p,&tp2);
+		apilar(&p,&(*tpE));
+	}
+}
