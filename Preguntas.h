@@ -211,7 +211,6 @@ Pregunta* insertarPreguntas(Pregunta *nd, Pregunta *r){
 
 void bajaPregunta(Encuesta **tope, Pregunta **iniP, Respuesta **iniR){
 	int idEnc, fin=0;
-	Pregunta *rcPr = NULL;
 	
 	listarEncNoProc(&(*tope));
   	controlID(&idEnc);
@@ -219,6 +218,7 @@ void bajaPregunta(Encuesta **tope, Pregunta **iniP, Respuesta **iniR){
   		do{
   			fin = recorrerLESPreg(idEnc, &(*iniP), &(*iniR));
 		  }while(fin != 1);
+		  
 }
 
 int recorrerLESPreg(int idEncuesta, Pregunta ** iniPr, Respuesta **iniResp){
@@ -227,11 +227,11 @@ int recorrerLESPreg(int idEncuesta, Pregunta ** iniPr, Respuesta **iniResp){
 	
 	rcPr = *iniPr;
 	while(rcPr != NULL){
+		
 		if(rcPr->EncuestaId == idEncuesta){		
 			do{
 				finalizar = RecorrerLCRes(rcPr->PreguntaId, &(*iniResp));
-			}while(finalizar != 1);
-					 
+			}while(finalizar != 1);	 
 				borrarPregunta(rcPr->PreguntaId, &(*iniPr));
 				return 0;
 		}
@@ -276,69 +276,80 @@ void buscarBorrarP(int idP, Pregunta **rc, Pregunta **ant){
 }
 
 int RecorrerLCRes(int idPreg, Respuesta **iniRes){
-	if(*iniRes == NULL) return 1;
-	
-	Respuesta *aux=NULL, *rcRes=NULL;
-	
-		aux = *iniRes;
-		rcRes = *iniRes;
-	
-		if(rcRes->PreguntaId == idPreg){
-			borrarRespuesta(idPreg, &(*iniRes));
-			return 0;
-		}
-		aux = rcRes->sgte;
-		while(aux != rcRes){
-			if(aux->PreguntaId == idPreg){
-				borrarRespuesta(idPreg, &(*iniRes));
-				return 0;
-			}
-			aux = aux->sgte;
-		}
-		
-		return 1;
+    if (*iniRes == NULL) return 1;
+
+    Respuesta *actual = *iniRes;
+    Respuesta *inicio = *iniRes;
+
+    do {
+        if (actual->PreguntaId == idPreg) {
+            borrarRespuesta(idPreg, iniRes);
+            return 0;
+        }
+        actual = actual->sgte;
+    } while (actual != NULL && actual != inicio); // Prevención de bucles o corrupción
+
+    return 1;
 }
+
 
 void borrarRespuesta(int idPrg, Respuesta **iniRs){
-	if(*iniRs == NULL) return; 
-	
-	Respuesta *ant=NULL, *bor=NULL;
-	int aBorrar;
-	
-	if(*iniRs != NULL){
-		bor = *iniRs;
-		aBorrar = 0;
-		buscarBorrarR(idPrg, &bor, &ant, &aBorrar);
-		if((bor == *iniRs) && ((*iniRs)->PreguntaId == idPrg)){
-			*iniRs = (*iniRs)->sgte;
-			aBorrar = 1;
-		}
-		if(aBorrar == 1){
-			ant->sgte = bor->sgte;
-			bor->sgte = NULL;
-			
-			free(bor);
-		}else{
-			printf("EL idPregunta: %d (nodo )no esta en la lista\n", idPrg);
-		}
-	}
+    if (*iniRs == NULL) return;
+
+    Respuesta *actual = *iniRs;
+    Respuesta *ant = NULL;
+    int encontrado = 0;
+
+    buscarBorrarR(idPrg, &actual, &ant, &encontrado);
+
+    if (encontrado) {
+        if (actual == *iniRs) { // caso nodo inicial
+            if (actual->sgte == actual) {
+                // único nodo en lista
+                free(actual);
+                *iniRs = NULL;
+            } else {
+                // varios nodos
+                Respuesta *aux = *iniRs;
+                while (aux->sgte != *iniRs)
+                    aux = aux->sgte;
+                aux->sgte = (*iniRs)->sgte;
+                Respuesta *tmp = *iniRs;
+                *iniRs = (*iniRs)->sgte;
+                tmp->sgte = NULL;
+                free(tmp);
+            }
+        } else {
+            ant->sgte = actual->sgte;
+            actual->sgte = NULL;
+            free(actual);
+        }
+    } else {
+        printf("El idPregunta %d no está en la lista de respuestas.\n", idPrg);
+    }
 }
 
+
 void buscarBorrarR(int idP, Respuesta **rc, Respuesta **ant, int *encontrado){
-	Respuesta *aux=NULL;
-	
-	*ant = *rc;
-	aux = *rc;
-	*rc = (*rc)->sgte;
-	while((*rc != aux) && (!(*encontrado))){
-		if((*rc)->PreguntaId == idP){
-			*encontrado = 1;
-		}else{
-			*ant = *rc;
-			*rc = (*rc)->sgte;
-		}
-	} 
+    Respuesta *aux = *rc;
+    *ant = *rc;
+    *rc = (*rc)->sgte;
+
+    while (*rc != aux && !(*encontrado)) {
+        if ((*rc)->PreguntaId == idP) {
+            *encontrado = 1;
+        } else {
+            *ant = *rc;
+            *rc = (*rc)->sgte;
+        }
+    }
+    // También verificar el nodo inicial
+    if (!(*encontrado) && aux->PreguntaId == idP) {
+        *rc = aux;
+        *encontrado = 1;
+    }
 }
+
 
 void ListarLESPreguntas(Pregunta *rc){
 	

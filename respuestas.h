@@ -5,7 +5,7 @@
 void altaRespuesta(Encuesta **tope, Pregunta *iniP, Respuesta **iniR);
 void CargaRespuestas(int idEnc, Pregunta *rc, Respuesta **iniR);
 void incrementoResid(int *respid, Respuesta *iniR);
-Respuesta* borrarlista(Respuesta *initemp);
+Respuesta* borrarlista(Respuesta *iniTmp);
 void ActualizarIdRes(Respuesta *rcTmp, Respuesta *iniRes);
 Respuesta* cargarListaTemp(Respuesta *rcTemp, Respuesta **iniRS);
 void insertarLRes(Respuesta **nodotemp, Respuesta **iniR);
@@ -135,6 +135,7 @@ void CargaRespuestas(int idEnc, Pregunta *rc, Respuesta **iniR){
 					}else{ 
 						printf("\nal menos una ponderacion debe ser uno, cargue nuevamente\n");
 						initemp=borrarlista(initemp); //liberar lista temporal 
+					
 						respnro=0;
 					} 
 				}		  
@@ -160,17 +161,25 @@ void incrementoResid(int *resId, Respuesta *iniR){
 	(*resId)++;
 }
 
-Respuesta* borrarlista(Respuesta *initemp){
-	Respuesta *aux=NULL;
-  
-	while(initemp!=NULL) { 
-   		aux=initemp;
-    	initemp=initemp->sgte;
-    	aux->sgte=NULL;
-    	free(aux);
-  	}
-  	return(NULL);
-} 
+Respuesta* borrarlista(Respuesta *iniTmp){
+    if (iniTmp == NULL) {
+        printf("No hay nodos en la lista circular\n");
+        return NULL;
+    }
+
+    Respuesta *aux = iniTmp->sgte;
+    Respuesta *sig;
+
+    while (aux != iniTmp) {
+        sig = aux->sgte;
+        free(aux);
+        aux = sig;
+    }
+
+    free(iniTmp); // finalmente se libera el nodo inicial
+    return NULL;
+}
+
 
 void ActualizarIdRes(Respuesta *rcTmp, Respuesta *iniRes){
 	int idx;
@@ -253,24 +262,28 @@ Respuesta* buscarant(int Respid, Respuesta *rc){
 
 void ListarLcRespuestas(Respuesta *LCR){
 	Respuesta *aux=NULL;
-	
-	printf("\nPreguntaId: %d\n", LCR->PreguntaId);
-	printf("RespuestaId: %d\n",LCR->RespuestaId);
-	printf("Nro Respuesta: %d\n", LCR->RespuestaNro);
-	printf("Respuesta: %s\n", LCR->Respuesta);
-	printf("Ponderacion: %.2f\n",LCR->Ponderacion);
-	printf("Activa: %d\n", LCR->Activa);
-	
-	aux = LCR->sgte;
-	while(aux != LCR){
-		printf("\nPreguntaId: %d\n", aux->PreguntaId);
-		printf("RespuestaId: %d\n",aux->RespuestaId);
-		printf("Nro Respuesta: %d\n", aux->RespuestaNro);
-		printf("Respuesta: %s\n", aux->Respuesta);
-		printf("Ponderacion: %.2f\n",aux->Ponderacion);
-		printf("Activa: %d\n", aux->Activa);
-		aux = aux->sgte;
+	if(LCR!= NULL){
+		printf("\nPreguntaId: %d\n", LCR->PreguntaId);
+		printf("RespuestaId: %d\n",LCR->RespuestaId);
+		printf("Nro Respuesta: %d\n", LCR->RespuestaNro);
+		printf("Respuesta: %s\n", LCR->Respuesta);
+		printf("Ponderacion: %.2f\n",LCR->Ponderacion);
+		printf("Activa: %d\n", LCR->Activa);
+		
+		aux = LCR->sgte;
+		while(aux != LCR){
+			printf("\nPreguntaId: %d\n", aux->PreguntaId);
+			printf("RespuestaId: %d\n",aux->RespuestaId);
+			printf("Nro Respuesta: %d\n", aux->RespuestaNro);
+			printf("Respuesta: %s\n", aux->Respuesta);
+			printf("Ponderacion: %.2f\n",aux->Ponderacion);
+			printf("Activa: %d\n", aux->Activa);
+			aux = aux->sgte;
+		}
+	}else{
+		printf("No hay respuestas existentes\n");
 	}
+	
 }
 
 void VerificarEncuesta(int idEcta, Encuesta **tpEnc, Pregunta *rcP, Respuesta *rcRsp){
