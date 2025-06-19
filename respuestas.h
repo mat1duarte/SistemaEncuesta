@@ -89,7 +89,6 @@ void CargaRespuestas(int idEnc, Pregunta *rc, Respuesta **iniR){
 					while(strcmp(respuesta,"0")!=0) { 
 						nodotemp=(Respuesta*) malloc(sizeof(Respuesta));
 						if (nodotemp!=NULL) { 
-							nodotemp->Activa=0;
 				            nodotemp->PreguntaId=rc->PreguntaId;  
 				            nodotemp->RespuestaId = 0;
 				            respnro++;
@@ -268,7 +267,6 @@ void ListarLcRespuestas(Respuesta *LCR){
 		printf("Nro Respuesta: %d\n", LCR->RespuestaNro);
 		printf("Respuesta: %s\n", LCR->Respuesta);
 		printf("Ponderacion: %.2f\n",LCR->Ponderacion);
-		printf("Activa: %d\n", LCR->Activa);
 		
 		aux = LCR->sgte;
 		while(aux != LCR){
@@ -277,7 +275,6 @@ void ListarLcRespuestas(Respuesta *LCR){
 			printf("Nro Respuesta: %d\n", aux->RespuestaNro);
 			printf("Respuesta: %s\n", aux->Respuesta);
 			printf("Ponderacion: %.2f\n",aux->Ponderacion);
-			printf("Activa: %d\n", aux->Activa);
 			aux = aux->sgte;
 		}
 	}else{
@@ -351,6 +348,7 @@ void ActivarEncuesta(Encuesta **tpE, int idEncuesta){
 		desapilar(&p,&(*tpE));
 		if(p->EncuestaId == idEncuesta){
 			p->Activa = 1; //Activa Encuesta dada de alta
+			printf("Encuesta dada de alta\n")
 		}
 		apilar(&p,&tp2);	
 	}

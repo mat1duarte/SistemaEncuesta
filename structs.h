@@ -9,14 +9,14 @@ typedef struct Encuesta{
 }Encuesta;
 
 typedef struct Pregunta{
-	int PreguntaId, EncuestaId, Activa;
+	int PreguntaId, EncuestaId;
 	char Pregunta[100];
 	float  Ponderacion;
 	struct Pregunta *sgte;
 }Pregunta;
 
 typedef struct Respuesta{
-	int RespuestaId, PreguntaId, RespuestaNro, Activa;
+	int RespuestaId, PreguntaId, RespuestaNro;
 	char Respuesta[50];
 	float  Ponderacion;
 	struct Respuesta *sgte;

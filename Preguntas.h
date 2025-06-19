@@ -76,7 +76,6 @@ void cargaPreguntas(int encId, Pregunta **inicio){
 	        	n->PreguntaId = auxId;
 				n->EncuestaId =  encId;
 				n->Ponderacion = pond;
-				n->Activa = 0;
 				strcpy(n->Pregunta,textoPregunta);
 				n->sgte = NULL;
 				(*inicio) = insertarPreguntas(n, *inicio);
@@ -357,10 +356,10 @@ void ListarLESPreguntas(Pregunta *rc){
 		printf("No hay preguntas existentes\n");
 	}else{
 		while(rc!=NULL){
-			printf("EncuestaId: %d \n",rc->EncuestaId);
+			printf("\nEncuestaId: %d \n",rc->EncuestaId);
 			printf("PreguntaId: %d \n",rc->PreguntaId);
 			printf("Pregunta: %s \n",rc->Pregunta);
-			printf("Ponderacion: %f \n", rc->Ponderacion);
+			printf("Ponderacion: %.2f \n", rc->Ponderacion);
 			rc=rc->sgte;
 		}
 	}	

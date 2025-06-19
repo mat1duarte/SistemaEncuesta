@@ -11,18 +11,16 @@ void apilar(Encuesta **nv, Encuesta **tope);
 void desapilar(Encuesta **ds, Encuesta **tope);
 int vaciaP(Encuesta *top);
 void altaEncuesta(Encuesta **tope);
-void bajaEncuesta(Encuesta **tope, Pregunta *LPG);
-void bajaPG(Pregunta *ini, int idencuesta, Respuesta *iniRes);
-void BajaRes(int idpregunta, Respuesta *rcRes);
+void bajaEncuesta(Encuesta **tope);
 int ExisteIdEnc(int id, Encuesta **tp);
 
 //Funciones de prueba
-void listarEncuestas();
 void listarPila(Encuesta **tope);
 void controlID(int *ID);
 void listartodapila(Encuesta **tope);
 void listarEncInactivos(Encuesta **tope);
 void listarEncNoProc(Encuesta **tope);
+void listarEncActivas(Encuesta **tope);
 
 
 // Función para generar el próximo ID disponible
@@ -70,7 +68,7 @@ int vaciaP(Encuesta *top){
 	return vac;
 }
 
-// Función para dar de alta una nueva encuesta
+// Modulo para dar de alta una nueva encuesta
 void altaEncuesta(Encuesta **tope){
     Encuesta nueva;
     FILE *archivo;
@@ -159,41 +157,7 @@ void altaEncuesta(Encuesta **tope){
     printf("Encuesta guardada exitosamente!\n");
 }
 
-// Función para mostrar todas las encuestas
-void listarEncuestas(){
-    FILE *archivo = fopen(ARCHIVO_CSV, "r");
-    if (archivo == NULL) {
-        printf("No hay encuestas registradas.\n");
-        return;
-    }
-    
-    printf("\n--- Listado de Encuestas ---\n");
-    printf("ID | Mes | Año | Procesada | Activa | Denominacion\n");
-    printf("--------------------------------------------------\n");
-    
-    char linea[256];
-    while (fgets(linea, sizeof(linea), archivo)) {
-		Encuesta e;
-        sscanf(linea, "%d,%s,%s,%d,%d,%[^\n]",
-			&e.EncuestaId,
-            &e.EncuestaMes,
-            &e.EncuestaAnio,
-            &e.Procesada,
-            &e.Activa,
-            e.Denominacion);
-        
-        printf("%2d | %2s | %4s | %9s | %6s | %s\n",
-			e.EncuestaId,
-            e.EncuestaMes,
-            e.EncuestaAnio,
-            e.Procesada ? "Sí" : "No",
-            e.Activa ? "Sí" : "No",
-            e.Denominacion);
-    }
-    fclose(archivo);
-}
-
-// Función para listar las encuestas activas desde la pila
+// Modulo para listar las encuestas activas y no procesadas
 void listarPila(Encuesta **tope){
 	
 	Encuesta *p=NULL, *tp2=NULL;
@@ -220,7 +184,7 @@ void listarPila(Encuesta **tope){
 	}
 }
 
-void bajaEncuesta(Encuesta **tope, Pregunta *LPG, Respuesta *LRS){
+void bajaEncuesta(Encuesta **tope){
 	int idBaja, encontro=0;
 	Encuesta *p=NULL, *tp2=NULL;
 	
@@ -236,7 +200,6 @@ void bajaEncuesta(Encuesta **tope, Pregunta *LPG, Respuesta *LRS){
 			desapilar(&p, &(*tope));
 	    	if(p->EncuestaId == idBaja){
 				p->Activa = 0;
-	    		bajaPG(LPG, idBaja, LRS);
 			}
 		apilar(&p, &tp2); // guarda todo temporalmente
 		}
@@ -313,7 +276,7 @@ int ExisteIdEnc(int id, Encuesta **tp){
 	return enc;
 }
 
-//Función para control de ID
+//Modulo para control de ID
 void controlID(int *ID){
 	int resultado;
     char confirmacion;
@@ -347,7 +310,7 @@ void controlID(int *ID){
     
 }
 
-// Función para listar todas las encuestas desde la pila
+// Modulo para listar todas las encuestas desde la pila
 void listartodapila(Encuesta **tope){
 	
 	Encuesta *p=NULL, *tp2=NULL;
@@ -399,122 +362,7 @@ void listarEncInactivos(Encuesta **tope){
 	}
 }
 
-void bajaPG(Pregunta *ini, int idencuesta, Respuesta *iniRes){
-	while (ini!= NULL){
-		if (ini->EncuestaId == idencuesta){
-			BajaRes(ini->PreguntaId, iniRes);
-			ini->Activa = 0;
-		}
-		ini = ini->sgte;
-	}
-	
-	FILE *archivo = fopen("preguntas.csv", "r");
-    if (archivo == NULL) {
-        printf("Error al abrir el archivo de preguntas\n");
-        return;
-    }
-
-    // Creamos un archivo temporal
-    FILE *temp = fopen("temp.csv", "w");
-    if (temp == NULL) {
-        printf("Error al crear archivo temporal\n");
-        fclose(archivo);
-        return;
-    }
-
-    char linea[256];
-    // Leemos la cabecera (si existe) y la copiamos
-    if (fgets(linea, sizeof(linea), archivo)) {
-    	fprintf(temp, "%s", linea);
-    }
-
-    // Procesamos cada lÃ­nea del archivo
-    while (fgets(linea, sizeof(linea), archivo)) {
-    	int preguntaId, encuestaId, ponderacion, activa;
-        char pregunta[100];
-
-        // Parseamos la lÃ­nea
-        if (sscanf(linea, "%d,%d,%d,%d,%[^\n]", &preguntaId, &encuestaId, &ponderacion, &activa, pregunta) == 5) {
-            
-            // Si es de la encuesta a dar de baja, marcamos como inactiva
-            if (encuestaId == idencuesta) {
-                activa = 0;
-            }
-            
-            // Escribimos la lÃ­nea (modificada o no) en el temporal
-            fprintf(temp, "%d,%d,%d,%d,%s\n", preguntaId, encuestaId, ponderacion, activa, pregunta);
-        }
-    }
-
-    fclose(archivo);
-    fclose(temp);
-
-    // Reemplazamos el archivo original
-    remove("preguntas.csv");
-    rename("temp.csv", "preguntas.csv");
-}
-
-void BajaRes(int idpregunta, Respuesta *rcRes){
-	Respuesta *aux;
-	
-	if(rcRes->PreguntaId == idpregunta){
-		rcRes->Activa = 0;
-	}
-	aux = rcRes->sgte;
-	while (aux != rcRes){
-		if(aux->PreguntaId == idpregunta){
-			aux->Activa = 0;
-		}			
-		aux = aux->sgte;
-	}
-	// Ahora actualizamos el archivo
-    FILE *archivoOriginal, *archivoTemporal;
-    char linea[200];
-    char tempFilename[] = "temp_preguntas.csv";
-    
-    archivoOriginal = fopen("preguntas.csv", "r");
-    if (archivoOriginal == NULL) {
-        perror("Error al abrir el archivo original");
-        return;
-    }
-    
-    archivoTemporal = fopen(tempFilename, "w");
-    if (archivoTemporal == NULL) {
-    	perror("Error al crear archivo temporal");
-        fclose(archivoOriginal);
-        return;
-    }
-    
-    // Procesamos cada lÃ­nea del archivo original
-    while (fgets(linea, sizeof(linea), archivoOriginal)) {
-        int currentPreguntaId, currentRespuestaId, nro, ponderacion, activa;
-        char respuesta[50];
-        
-        // Parseamos la lÃ­nea (asumiendo formato: id_pregunta,id_respuesta,nro,respuesta,ponderacion,activa)
-        if (sscanf(linea, "%d,%d,%d,%[^,],%d,%d", &currentPreguntaId, &currentRespuestaId, &nro, respuesta, &ponderacion, &activa) == 6) {
-            
-            // Si es una respuesta de la pregunta que nos interesa, la desactivamos
-        	if (currentPreguntaId == idpregunta) {
-            	activa = 0;
-            }
-            
-            // Escribimos la lÃ­nea (modificada o no) en el temporal
-            fprintf(archivoTemporal, "%d,%d,%d,%s,%d,%d\n", currentPreguntaId, currentRespuestaId, nro, respuesta, ponderacion, activa);
-        } else {
-            // Si no pudo parsearse, copiamos la lÃ­nea tal cual (podrÃ­an ser encabezados)
-            fprintf(archivoTemporal, "%s", linea);
-        }
-    }
-    
-    fclose(archivoOriginal);
-    fclose(archivoTemporal);
-    
-    // Reemplazamos el archivo original con el temporal
-    remove("preguntas.csv");
-    rename(tempFilename, "preguntas.csv");
-}
-
-//Funcion para listar encuestas no procesadas
+//Modulo para listar encuestas no procesadas
 void listarEncNoProc(Encuesta **tope){
 	
 	Encuesta *p=NULL, *tp2=NULL;
@@ -536,6 +384,33 @@ void listarEncNoProc(Encuesta **tope){
 				p->Procesada ? "Si" : "No",
 				p->Activa ? "Si" : "No",
 				p->Denominacion);
+        }
+        apilar(&p,&(*tope));
+	}
+}
+
+//Modulo para listar encuestas activas
+void listarEncActivas(Encuesta **tope){
+	
+	Encuesta *p=NULL, *tp2=NULL;
+	
+	while(vaciaP(*tope)!=1){
+		desapilar(&p, &(*tope));
+		apilar(&p,&tp2);
+	}
+	printf("\n--- Listado de Encuestas ---\n");
+    printf("ID | Mes | Año | Procesada | Activa | Denominacion\n");
+    printf("--------------------------------------------------\n");
+	while(vaciaP(tp2)!=1){
+		desapilar(&p,&tp2);
+		if(p->Activa==1){
+			printf("%2d | %2s | %4s | %9s | %6s | %s\n",
+            	p->EncuestaId,
+            	p->EncuestaMes,
+            	p->EncuestaAnio,
+            	p->Procesada ? "Si" : "No",
+            	p->Activa ? "Si" : "No",
+            	p->Denominacion);
         }
         apilar(&p,&(*tope));
 	}
