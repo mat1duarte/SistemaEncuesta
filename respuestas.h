@@ -348,7 +348,7 @@ void ActivarEncuesta(Encuesta **tpE, int idEncuesta){
 		desapilar(&p,&(*tpE));
 		if(p->EncuestaId == idEncuesta){
 			p->Activa = 1; //Activa Encuesta dada de alta
-			printf("Encuesta dada de alta\n")
+			printf("Encuesta dada de alta\n");
 		}
 		apilar(&p,&tp2);	
 	}

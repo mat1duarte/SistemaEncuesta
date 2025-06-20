@@ -6,12 +6,15 @@
 #include "encuestas.h"
 #include "Preguntas.h"
 #include "respuestas.h"
+#include "encuestadores.h"
+#include "Participaciones.h"
 
 
+void menuEncuestador(Encuestador **Entrada, Encuestador **Salida);
 void menuEncuesta(Encuesta **top, Pregunta *LPreg, Respuesta *LRes);
 void menuPregunta(Encuesta **top, Pregunta **LPreg, Respuesta **LRespuesta);
 void menuRespuesta(Encuesta **top, Pregunta *LPreg, Respuesta **LRes);
-void menuProcesos(Encuesta **top, Pregunta *LPreg, Respuesta *LRes, Encuestador **Entrada, Encuestador **Salida);
+void menuProcesos(Encuesta **top, Pregunta *LPreg, Respuesta *LRes, Encuestador **Entrada, Encuestador **Salida, Participaciones **LPart);
 
 
 int main(){
@@ -20,6 +23,7 @@ int main(){
 	Pregunta *LPregunta=NULL;
 	Respuesta *LRespuesta=NULL;
 	Encuestador *E=NULL, *S=NULL;
+	Participaciones *LPart = NULL;
 	
 	char op;
 	int band=1;
@@ -30,10 +34,11 @@ int main(){
 		printf("-------------------------------------------------------------------------------\n");
 	
 		printf("0- Salir.\n");
-		printf("1- Encuesta.\n");
-		printf("2- Pregunta.\n");
-		printf("3- Respuesta.\n");
-		printf("4- Procesos\n");
+		printf("1- Encuestador.\n");
+		printf("2- Encuesta.\n");
+		printf("3- Pregunta.\n");
+		printf("4- Respuesta.\n");
+		printf("5- Procesos\n");
 	
 		fflush(stdin);
 		scanf("%c", &op);
@@ -49,21 +54,25 @@ int main(){
 				puts("\n\t\t\t\tSaliendo...");
 				printf("-------------------------------------------------------------------------------\n\n");
 			break;
-		
+			
 			case '1':
+				menuEncuestador(&E,&S);
+			break;
+			
+			case '2':
 				menuEncuesta(&tp, LPregunta, LRespuesta);
 			break;
 		
-			case '2':
+			case '3':
 				menuPregunta(&tp, &LPregunta,&LRespuesta);
 			break;
 		
-			case '3':
+			case '4':
 				menuRespuesta(&tp, LPregunta, &LRespuesta);
 			break;
 			
-			case '4':
-				menuProcesos(&tp, LPregunta, LRespuesta, &E, &S);
+			case '5':
+				menuProcesos(&tp, LPregunta, LRespuesta, &E, &S, &LPart);
 			break;
 			
 			default:
@@ -76,6 +85,53 @@ int main(){
 	return 0;
 }
 
+void menuEncuestador(Encuestador **Entrada, Encuestador **Salida){
+	char op;
+	int band = 1;
+	
+	while(band!=0){
+		printf("\n-------------------------------------------------------------------------------\n");
+		printf("\t\t\t\tSistemaEncuesta Encuestas\n");
+		printf("-------------------------------------------------------------------------------\n");
+		printf("1- Alta Encuestador.\n");
+		printf("2- listar Encuestadores.\n");
+		printf("0- Volver.\n");
+			
+		fflush(stdin);
+		scanf("%c", &op);
+		printf("\n");
+		fflush(stdin);
+		
+		switch(op){
+			case '0':
+				band=0;
+				system("cls");
+				printf("\n-------------------------------------------------------------------------------");
+				puts("\n\t\t\t\tVolviendo al Menu.");
+				printf("-------------------------------------------------------------------------------\n\n");
+			break;
+			
+			case '1':
+				system("cls");				
+				//Alta Encuestadores
+				altaEncuestador(&(*Entrada), &(*Salida));
+			break;
+			
+			case '2':
+				system("cls");
+				//Listar cola encuestadores
+				listarEncuestadores(&(*Entrada), &(*Salida));
+			break;
+			
+			default:
+			system("cls");
+			printf("\n-------------------------------------------------------------------------------");
+			puts("\n\t\t\tOpcion no valida, intente nuevo.");
+			printf("-------------------------------------------------------------------------------\n\n");
+		}
+	}
+}
+
 void menuEncuesta(Encuesta **top, Pregunta *LPreg, Respuesta *LRes){
 	char op;
 	int band = 1;
@@ -86,8 +142,7 @@ void menuEncuesta(Encuesta **top, Pregunta *LPreg, Respuesta *LRes){
 		printf("-------------------------------------------------------------------------------\n");
 		printf("1- Alta Encuesta.\n");
 		printf("2- Baja Encuesta.\n");
-		printf("3- Listar Encuestas.csv.\n");
-		printf("4- Listar pila Encuestas\n");
+		printf("3- Listar pila Encuestas\n");
 		printf("0- Volver.\n");
 			
 		fflush(stdin);
@@ -242,7 +297,7 @@ void menuRespuesta(Encuesta **top, Pregunta *LPreg, Respuesta **LRes){
 	}
 }
 
-void menuProcesos(Encuesta **top, Pregunta *LPreg, Respuesta *LRes, Encuestador **Entrada, Encuestador **Salida){
+void menuProcesos(Encuesta **top, Pregunta *LPreg, Respuesta *LRes, Encuestador **Entrada, Encuestador **Salida, Participaciones **Lpar){
 	char op;
 	int band = 1;
 	
@@ -253,6 +308,7 @@ void menuProcesos(Encuesta **top, Pregunta *LPreg, Respuesta *LRes, Encuestador 
 		printf("1- Carga Participaciones.\n");
 		printf("2- Calcular ponderacion de una encuesta.\n");
 		printf("3- Listar participaciones a una encuesta.\n");
+		printf("4- Listar TODAS participaciones a una encuesta.\n");
 		printf("0- Volver.\n");
 		
 		fflush(stdin);
@@ -272,7 +328,7 @@ void menuProcesos(Encuesta **top, Pregunta *LPreg, Respuesta *LRes, Encuestador 
 			case '1':
 				system("cls");				
 				//Cargar participacion a una encuesta
-			    cargarParticipaciones(&(*top), LPreg, LRes, &(*Entrada), &(*Salida));
+			    cargarParticipaciones(&(*top), LPreg, LRes, &(*Entrada), &(*Salida), &(*Lpar));
 			break;
 			
 			case '2':
@@ -286,6 +342,12 @@ void menuProcesos(Encuesta **top, Pregunta *LPreg, Respuesta *LRes, Encuestador 
 				system("cls");
 				//Listar participaciones de una encuesta x
 					
+			break;
+			
+			case '4':
+				system("cls");
+				//Listar todas las participaciones 
+				listarTodasPart(*Lpar);
 			break;
 
 			
