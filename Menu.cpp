@@ -8,13 +8,15 @@
 #include "respuestas.h"
 #include "encuestadores.h"
 #include "Participaciones.h"
+#include "Procesar.h"
+
 
 
 void menuEncuestador(Encuestador **Entrada, Encuestador **Salida);
 void menuEncuesta(Encuesta **top, Pregunta *LPreg, Respuesta *LRes);
 void menuPregunta(Encuesta **top, Pregunta **LPreg, Respuesta **LRespuesta);
 void menuRespuesta(Encuesta **top, Pregunta *LPreg, Respuesta **LRes);
-void menuProcesos(Encuesta **top, Pregunta *LPreg, Respuesta *LRes, Encuestador **Entrada, Encuestador **Salida, Participaciones **LPart);
+void menuProcesos(Encuesta **top, Pregunta *LPreg, Respuesta *LRes, Encuestador **Entrada, Encuestador **Salida, Participaciones **RPar);
 
 
 int main(){
@@ -23,7 +25,7 @@ int main(){
 	Pregunta *LPregunta=NULL;
 	Respuesta *LRespuesta=NULL;
 	Encuestador *E=NULL, *S=NULL;
-	Participaciones *LPart = NULL;
+	Participaciones *RPart = NULL;
 	
 	char op;
 	int band=1;
@@ -72,7 +74,7 @@ int main(){
 			break;
 			
 			case '5':
-				menuProcesos(&tp, LPregunta, LRespuesta, &E, &S, &LPart);
+				menuProcesos(&tp, LPregunta, LRespuesta, &E, &S, &RPart);
 			break;
 			
 			default:
@@ -297,7 +299,8 @@ void menuRespuesta(Encuesta **top, Pregunta *LPreg, Respuesta **LRes){
 	}
 }
 
-void menuProcesos(Encuesta **top, Pregunta *LPreg, Respuesta *LRes, Encuestador **Entrada, Encuestador **Salida, Participaciones **Lpar){
+
+void menuProcesos(Encuesta **top, Pregunta *LPreg, Respuesta *LRes, Encuestador **Entrada, Encuestador **Salida, Participaciones **RPar){
 	char op;
 	int band = 1;
 	
@@ -308,7 +311,7 @@ void menuProcesos(Encuesta **top, Pregunta *LPreg, Respuesta *LRes, Encuestador 
 		printf("1- Carga Participaciones.\n");
 		printf("2- Calcular ponderacion de una encuesta.\n");
 		printf("3- Listar participaciones a una encuesta.\n");
-		printf("4- Listar TODAS participaciones a una encuesta.\n");
+		printf("4- Listar TODAS PARTICIPACIONES.\n");
 		printf("0- Volver.\n");
 		
 		fflush(stdin);
@@ -328,7 +331,7 @@ void menuProcesos(Encuesta **top, Pregunta *LPreg, Respuesta *LRes, Encuestador 
 			case '1':
 				system("cls");				
 				//Cargar participacion a una encuesta
-			    cargarParticipaciones(&(*top), LPreg, LRes, &(*Entrada), &(*Salida), &(*Lpar));
+			    cargarParticipaciones(&(*top), LPreg, LRes, &(*Entrada), &(*Salida), &(*RPar));
 			break;
 			
 			case '2':
@@ -341,15 +344,14 @@ void menuProcesos(Encuesta **top, Pregunta *LPreg, Respuesta *LRes, Encuestador 
 			case '3':
 				system("cls");
 				//Listar participaciones de una encuesta x
-					
+				Mostrarparticipaciones(&(*top), LPreg, LRes, &(*Entrada), &(*Salida), *RPar);
 			break;
 			
 			case '4':
 				system("cls");
-				//Listar todas las participaciones 
-				listarTodasPart(*Lpar);
+				//Listar todas las participaciones
+				listarArbol(*RPar);	
 			break;
-
 			
 			default:
 			system("cls");

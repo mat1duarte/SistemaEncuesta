@@ -21,7 +21,11 @@ void listartodapila(Encuesta **tope);
 void listarEncInactivos(Encuesta **tope);
 void listarEncNoProc(Encuesta **tope);
 void listarEncActivas(Encuesta **tope);
+<<<<<<< HEAD
 
+=======
+void ListarEncuestaPro(Encuesta **tope);
+>>>>>>> 7b08ad3 (completando mostrar desde el arbol de participaciones)
 
 // Función para generar el próximo ID disponible
 int generarNuevoId(){
@@ -416,3 +420,32 @@ void listarEncActivas(Encuesta **tope){
 	}
 }
 
+<<<<<<< HEAD
+=======
+void ListarEncuestaPro(Encuesta **tope){
+	
+	Encuesta *p=NULL, *tp2=NULL;
+	
+	while(vaciaP(*tope)!=1){
+		desapilar(&p, &(*tope));
+		apilar(&p,&tp2);
+	}
+	printf("\n--- Listado de Encuestas ---\n");
+    printf("ID | Mes | Año | Procesada | Activa | Denominacion\n");
+    printf("--------------------------------------------------\n");
+	while(vaciaP(tp2)!=1){
+		desapilar(&p,&tp2);
+		if((p->Procesada==1)){
+			printf("%2d | %2s | %4s | %9s | %6s | %s\n",
+				p->EncuestaId,
+				p->EncuestaMes,
+				p->EncuestaAnio,
+				p->Procesada ? "Si" : "No",
+				p->Activa ? "Si" : "No",
+				p->Denominacion);
+        }
+        apilar(&p,&(*tope));
+	}
+}
+
+>>>>>>> 7b08ad3 (completando mostrar desde el arbol de participaciones)

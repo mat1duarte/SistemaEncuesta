@@ -2,15 +2,18 @@
 #include <string.h>
 #include <stdlib.h>
 
-void cargarParticipaciones(Encuesta **tope, Pregunta *iniP, Respuesta *iniR, Encuestador **Ent, Encuestador **Sal, Participaciones **iniPar);
+
+void cargarParticipaciones(Encuesta **tope, Pregunta *iniP, Respuesta *iniR, Encuestador **Ent, Encuestador **Sal, Participaciones **RPar);
 int obtenerUltimoId(Participaciones *rcPar);
 void mostrarRespuestas(int idPreg, Respuesta *rcRes);
 void comprobarRes(int *ex, int idPreg, Respuesta *rcRes, int res, int *idResp);
 Participaciones* insParticipaciones(Participaciones *nd, Participaciones *r);
 void listarTodasPart(Participaciones *rcPar);
+void recorrerIRD (Participaciones *r, int *id);
+void listarArbol(Participaciones *r);
 
 
-void cargarParticipaciones(Encuesta **tope, Pregunta *iniP, Respuesta *iniR, Encuestador **Ent, Encuestador **Sal, Participaciones **iniPar){
+void cargarParticipaciones(Encuesta **tope, Pregunta *iniP, Respuesta *iniR, Encuestador **Ent, Encuestador **Sal, Participaciones **RPar){
 	int idEnc=0, existe=0, res=0, encuestadorId=0, idPart=0, idRes=0;
 	char fecha[20];
 	Encuesta *p=NULL, *tp2=NULL;
@@ -20,7 +23,9 @@ void cargarParticipaciones(Encuesta **tope, Pregunta *iniP, Respuesta *iniR, Enc
 	
 	encuestadorId = selecEncuestadores(&(*Ent), &(*Sal));
 	
-	idPart = obtenerUltimoId(*iniPar);
+	idPart = obtenerUltimoId(*RPar);
+	
+	idPart = idPart + 1;
 	
 	listarEncActivas(&(*tope));
 	controlID(&idEnc);
@@ -59,9 +64,10 @@ void cargarParticipaciones(Encuesta **tope, Pregunta *iniP, Respuesta *iniR, Enc
 						n->IdEncuestador = encuestadorId;
 						n->IdEncRespondida = idPart;
 						strcpy(n->FechaRealizo,fecha);
-						n->sgte = NULL;
+						n->izq = NULL;
+						n->der = NULL;
 						
-						*iniPar = insParticipaciones(n,*iniPar);
+						*RPar = insParticipaciones(n,*RPar);
 						
 						while(vaciaP(*tope) != 1){
 							desapilar(&p,&(*tope));
@@ -78,21 +84,15 @@ void cargarParticipaciones(Encuesta **tope, Pregunta *iniP, Respuesta *iniR, Enc
 		}
 		iniP = iniP->sgte;
 	}
-	
-	
-	
 }
 
-int obtenerUltimoId(Participaciones *rcPar){
+
+int obtenerUltimoId(Participaciones *rPar){
 	int ultimoId =0;
 	
-	while(rcPar != NULL){
-		ultimoId = rcPar->IdEncRespondida;
-		rcPar = rcPar->sgte;
+	if (rPar != NULL){
+		recorrerIRD (rPar, &ultimoId);
 	}
-	
-	ultimoId = ultimoId + 1;
-	
 	return ultimoId;
 }
 
@@ -136,25 +136,55 @@ void comprobarRes(int *ex, int idPreg, Respuesta *rcRes, int res, int *idResp){
 }
 
 Participaciones* insParticipaciones(Participaciones *nd, Participaciones *r){
-	if(r != NULL){
-		r->sgte = insParticipaciones(nd,r->sgte);
+
+	if (r != NULL){
+		if (r->IdEncuesta == nd->IdEncuesta){
+			if (r->IdEncRespondida == nd->IdEncRespondida){
+				if (nd->IdPregunta < r->IdPregunta){
+					r->izq = insParticipaciones (nd, r->izq);	
+				}else{
+					r->der = insParticipaciones (nd, r->der);
+				}
+			}else{
+				if (nd->IdEncRespondida < r->IdEncRespondida){
+					r->izq = insParticipaciones (nd, r->izq); 
+				}else{
+					r->der = insParticipaciones (nd, r->der);
+				}
+			}
+		}else{
+			if (nd->IdEncuesta < r->IdEncuesta){
+					r->izq = insParticipaciones (nd, r->izq); 
+			}else{
+					r->der = insParticipaciones (nd, r->der);
+			}
+		}		
 	}else{
 		r = nd;
 	}
-	
-	return(r);
+	return (r);
 }
 
-void listarTodasPart(Participaciones *rcPar){
-	while(rcPar != NULL){
-		printf("\nidEncuesta: %d\n", rcPar->IdEncuesta);
-		printf("idPregunta: %d\n", rcPar->IdPregunta);
-		printf("idRespuesta: %d\n", rcPar->IdRespuesta);
-		printf("fecha: %s\n", rcPar->FechaRealizo);
-		printf("id encuestador: %d\n", rcPar->IdEncuestador);
-		printf("id enc respondida: %d\n", rcPar->IdEncRespondida);
-		
-		rcPar = rcPar->sgte;
+void recorrerIRD (Participaciones *r, int *id){
+	
+	if (r!= NULL){
+		recorrerIRD (r->izq, &(*id));
+		*id = r->IdEncRespondida;
+		recorrerIRD (r->der, &(*id));
+	}
+}
+
+// PARA LISTAR LAS PARTICIPACIONES DEL ARBOL
+void listarArbol(Participaciones *r){
+	if(r != NULL){
+		listarArbol(r->izq);
+		printf("\nidencuesta: %d\n",r->IdEncuesta);
+		printf("idpregunta: %d\n",r->IdPregunta);
+		printf("idrespuesta: %d\n",r->IdRespuesta);
+		printf("idencuestador: %d\n",r->IdEncuestador);
+		printf("idencuestarespondida. %d\n", r->IdEncRespondida);
+		printf("fecha: %s\n",r->FechaRealizo);
+		listarArbol(r->der);
 	}
 }
 

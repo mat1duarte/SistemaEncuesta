@@ -31,7 +31,7 @@ typedef struct Encuestador{
 typedef struct Participaciones{
 	int IdEncuesta, IdPregunta, IdRespuesta, IdEncuestador, IdEncRespondida;
 	char FechaRealizo[20];
-	struct Participaciones *sgte;
+	struct Participaciones *izq, *der;
 }Participaciones;
 
 
