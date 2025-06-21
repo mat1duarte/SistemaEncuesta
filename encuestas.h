@@ -21,11 +21,7 @@ void listartodapila(Encuesta **tope);
 void listarEncInactivos(Encuesta **tope);
 void listarEncNoProc(Encuesta **tope);
 void listarEncActivas(Encuesta **tope);
-<<<<<<< HEAD
-
-=======
 void ListarEncuestaPro(Encuesta **tope);
->>>>>>> 7b08ad3 (completando mostrar desde el arbol de participaciones)
 
 // Función para generar el próximo ID disponible
 int generarNuevoId(){
@@ -420,8 +416,6 @@ void listarEncActivas(Encuesta **tope){
 	}
 }
 
-<<<<<<< HEAD
-=======
 void ListarEncuestaPro(Encuesta **tope){
 	
 	Encuesta *p=NULL, *tp2=NULL;
@@ -448,4 +442,3 @@ void ListarEncuestaPro(Encuesta **tope){
 	}
 }
 
->>>>>>> 7b08ad3 (completando mostrar desde el arbol de participaciones)

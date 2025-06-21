@@ -9,6 +9,8 @@ void mostrarPregunta(Pregunta *inip, int idpregunta);
 void mostrarRespuesta (Respuesta *inir, int idpregunta, int idrespuesta);
 void mostrarEncuestador(Encuestador **ent, Encuestador **sal, int idencuestador);
 void mostrarDenominacion (Encuesta **Tope, int idencuesta);
+void calcularponderacion(Participaciones *Rpar,Pregunta *LPreg, Respuesta *LRes, Encuesta **tope);
+void IRDcalculopond(Participaciones *ar, int IdEncuesta, int *IdEncresp, float *Acumpond, float *pondxpreg, float *totalpart, Pregunta *IniP, Respuesta *IniR);
 
 void Mostrarparticipaciones(Encuesta **tope, Pregunta *iniP, Respuesta *iniR, Encuestador **Ent, Encuestador **Sal, Participaciones *R){
 	int IDenc=0, correcto=0, idencResp=0;
@@ -131,5 +133,99 @@ void mostrarDenominacion (Encuesta **Tope, int idencuesta){
 		apilar(&aux, &(*Tope));
 	}
 }
+
+
+ void calcularponderacion(Participaciones *Rpar,Pregunta *LPreg, Respuesta *LRes, Encuesta **tope) { 
+   int IDenc=0, correcto=0;
+   int IdEncresp = 0;
+    float Acumpond = 0;
+    float pondxpreg = 0;
+    float totalpart = 0; 
+    
 	
+	ListarEncuestaPro(&(*tope));
+	
+	do{
+    	printf ("\nIngrese ID encuesta: ");
+    	scanf("%d",&IDenc);
+	    correcto = verificar (&(*tope), IDenc);
+	    if (correcto == 0) {
+			printf("\n Error, encuesta no disponible");
+		}
+	} while (correcto != 1);
+   
+   IRDcalculopond(Rpar, IDenc, &IdEncresp, &Acumpond, &pondxpreg, &totalpart, LPreg, LRes);
+   
+ }	
+ 
+ void IRDcalculopond(Participaciones *ar, int IdEncuesta, int *IdEncresp, float *Acumpond, float *pondxpreg, float *totalpart, Pregunta *IniP, Respuesta *IniR) {
+    Respuesta *rcr, *aux;
+    Pregunta *rcp;
+    float totalpond = 0; 
+    
+    rcp = IniP;
+    rcr = IniR;
+    
+    if (ar != NULL) {
+        IRDcalculopond(ar->izq, IdEncuesta, IdEncresp, Acumpond, pondxpreg, totalpart, IniP, IniR);
+        
+        if (IdEncuesta == ar->IdEncuesta) {
+            *pondxpreg = 0;
+            if (*IdEncresp == ar->IdEncRespondida) {
+                while (rcp != NULL) {
+                    if (ar->IdPregunta == rcp->PreguntaId) {
+                        *pondxpreg = rcp->Ponderacion;
+                    }
+                    rcp = rcp->sgte;
+                }
+                
+                if (rcr->RespuestaId == ar->IdRespuesta) {
+                    *pondxpreg = *pondxpreg * rcr->Ponderacion;
+                } else {
+                    aux = rcr->sgte;
+                    while (aux != rcr) {
+                        if (aux->RespuestaId == ar->IdRespuesta) {
+                            *pondxpreg = *pondxpreg * rcr->Ponderacion;
+                        }
+                        aux = aux->sgte;
+                    }
+                }
+                
+                totalpond = totalpond + *pondxpreg;
+                
+            } else {
+                printf("Ponderacion total encuesta id %d es %f\n", *IdEncresp, totalpond);
+                *Acumpond = *Acumpond + totalpond;
+                totalpond = 0;
+                *pondxpreg = 0;
+                *IdEncresp = *IdEncresp + 1;
+                
+                rcp = IniP; 
+                while (rcp != NULL) {
+                    if (ar->IdPregunta == rcp->PreguntaId) {
+                        *pondxpreg = rcp->Ponderacion;
+                    }
+                    rcp = rcp->sgte;
+                }
+                
+                if (rcr->RespuestaId == ar->IdRespuesta) {
+                    *pondxpreg = *pondxpreg * rcr->Ponderacion;
+                } else {
+                    aux = rcr->sgte;
+                    while (aux != rcr) {
+                        if (aux->RespuestaId == ar->IdRespuesta) {
+                            *pondxpreg = *pondxpreg * rcr->Ponderacion;
+                        }
+                        aux = aux->sgte;
+                    }
+                }
+                
+                totalpond = totalpond + *pondxpreg;
+            }
+            
+            IRDcalculopond(ar->der, IdEncuesta, IdEncresp, Acumpond, pondxpreg, totalpart, IniP, IniR);
+        }
+    }
+}
+
 

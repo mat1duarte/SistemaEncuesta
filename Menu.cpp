@@ -337,7 +337,7 @@ void menuProcesos(Encuesta **top, Pregunta *LPreg, Respuesta *LRes, Encuestador 
 			case '2':
 				system("cls");
 				//Calcular ponderacion de una encuesta x
-				
+				calcularponderacion(*RPar,LPreg,LRes,&(*top));
 			break;
 			
 			
