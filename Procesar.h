@@ -10,7 +10,7 @@ void mostrarRespuesta (Respuesta *inir, int idpregunta, int idrespuesta);
 void mostrarEncuestador(Encuestador **ent, Encuestador **sal, int idencuestador);
 void mostrarDenominacion (Encuesta **Tope, int idencuesta);
 void calcularponderacion(Participaciones *Rpar,Pregunta *LPreg, Respuesta *LRes, Encuesta **tope);
-void IRDcalculopond(Participaciones *ar, int IdEncuesta, int *IdEncresp, float *Acumpond, float *pondxpreg, float *totalpart, Pregunta *IniP, Respuesta *IniR);
+void IRDcalculopond(Participaciones *ar, int IdEncuesta, int *IdEncresp, float *Acumpond, float *pondxpreg, float *totalpond, Pregunta *IniP, Respuesta *IniR, int *contParti, int *ultimo);
 
 void Mostrarparticipaciones(Encuesta **tope, Pregunta *iniP, Respuesta *iniR, Encuestador **Ent, Encuestador **Sal, Participaciones *R){
 	int IDenc=0, correcto=0, idencResp=0;
@@ -136,9 +136,14 @@ void mostrarDenominacion (Encuesta **Tope, int idencuesta){
 
 
  void calcularponderacion(Participaciones *Rpar,Pregunta *LPreg, Respuesta *LRes, Encuesta **tope) { 
-   int IDenc=0, correcto=0;
-   int IdEncresp = 0;
-    float Acumpond = 0;
+	 if (LPreg == NULL || LRes == NULL) {
+	        printf("Error: Debe cargar las preguntas y respuestas antes de calcular la ponderación.\n");
+	        return;
+	    }
+    
+	int IDenc=0, correcto=0, contPart=0, ultimaPart=0;
+	int IdEncresp = 0;
+	float Acumpond = 0;
     float pondxpreg = 0;
     float totalpart = 0; 
     
@@ -154,78 +159,124 @@ void mostrarDenominacion (Encuesta **Tope, int idencuesta){
 		}
 	} while (correcto != 1);
    
-   IRDcalculopond(Rpar, IDenc, &IdEncresp, &Acumpond, &pondxpreg, &totalpart, LPreg, LRes);
+   IRDcalculopond(Rpar, IDenc, &IdEncresp, &Acumpond, &pondxpreg, &totalpart, LPreg, LRes, &contPart, &ultimaPart);
    
+   if(ultimaPart==1){
+   		if (IdEncresp > 0) {
+	        printf("Ponderacion total participacion id %d es %f\n", IdEncresp, totalpart);
+	        Acumpond = Acumpond + totalpart;
+	        contPart = contPart = 1;  
+	    }
+   }
+   
+   Acumpond = (Acumpond/contPart);
+   printf("\nEl promedio de ponderacion de las participaciones es: %.2f", Acumpond);
  }	
  
- void IRDcalculopond(Participaciones *ar, int IdEncuesta, int *IdEncresp, float *Acumpond, float *pondxpreg, float *totalpart, Pregunta *IniP, Respuesta *IniR) {
-    Respuesta *rcr, *aux;
-    Pregunta *rcp;
-    float totalpond = 0; 
-    
+ void IRDcalculopond(Participaciones *ar, int IdEncuesta, int *IdEncresp, float *Acumpond, float *pondxpreg, float *totalpond, Pregunta *IniP, Respuesta *IniR, int *contParti, int *ultimo) {
+    Respuesta *rcr = NULL, *aux = NULL;
+    Pregunta *rcp = NULL;
+
+    if (IniP == NULL || IniR == NULL) {
+        printf("ERROR: Listas de preguntas o respuestas no están inicializadas (IniP o IniR == NULL)\n");
+        return;
+    }
+
     rcp = IniP;
     rcr = IniR;
-    
+
     if (ar != NULL) {
-        IRDcalculopond(ar->izq, IdEncuesta, IdEncresp, Acumpond, pondxpreg, totalpart, IniP, IniR);
-        
+        IRDcalculopond(ar->izq, IdEncuesta, &(*IdEncresp), &(*Acumpond), &(*pondxpreg), &(*totalpond), IniP, IniR, &(*contParti), &(*ultimo));
+
         if (IdEncuesta == ar->IdEncuesta) {
+        	
             *pondxpreg = 0;
+
             if (*IdEncresp == ar->IdEncRespondida) {
+            	*ultimo=1;
+            	
                 while (rcp != NULL) {
                     if (ar->IdPregunta == rcp->PreguntaId) {
                         *pondxpreg = rcp->Ponderacion;
                     }
                     rcp = rcp->sgte;
                 }
-                
+
+                if (rcr == NULL) {
+                    printf("ERROR: Lista de respuestas no inicializada o vacía (rcr == NULL)\n");
+                    return;
+                }
+
                 if (rcr->RespuestaId == ar->IdRespuesta) {
-                    *pondxpreg = *pondxpreg * rcr->Ponderacion;
+                    *pondxpreg = (*pondxpreg) * (rcr->Ponderacion);
                 } else {
+                    if (rcr->sgte == NULL) {
+                        printf("ERROR: La lista circular de respuestas no está bien conformada (rcr->sgte == NULL)\n");
+                        return;
+                    }
+
                     aux = rcr->sgte;
                     while (aux != rcr) {
                         if (aux->RespuestaId == ar->IdRespuesta) {
-                            *pondxpreg = *pondxpreg * rcr->Ponderacion;
+                            *pondxpreg = (*pondxpreg) * (aux->Ponderacion);
                         }
                         aux = aux->sgte;
                     }
                 }
-                
-                totalpond = totalpond + *pondxpreg;
-                
+
+                *totalpond = (*totalpond) + (*pondxpreg);
+
             } else {
-                printf("Ponderacion total encuesta id %d es %f\n", *IdEncresp, totalpond);
-                *Acumpond = *Acumpond + totalpond;
-                totalpond = 0;
+            	*ultimo=2;
+            	
+                if (*IdEncresp > 0) {
+                    printf("Ponderacion total participacion id %d es %f\n", *IdEncresp, *totalpond);
+                }
+
+                *Acumpond = (*Acumpond) + (*totalpond);
+                *totalpond = 0;
                 *pondxpreg = 0;
-                *IdEncresp = *IdEncresp + 1;
-                
-                rcp = IniP; 
+                *IdEncresp = ar->IdEncRespondida;
+                *contParti = (*contParti) + 1;
+
+                rcp = IniP;
                 while (rcp != NULL) {
                     if (ar->IdPregunta == rcp->PreguntaId) {
                         *pondxpreg = rcp->Ponderacion;
                     }
                     rcp = rcp->sgte;
                 }
-                
+
+                rcr = IniR;
+                if (rcr == NULL) {
+                    printf("ERROR: Lista de respuestas no inicializada o vacía (rcr == NULL)\n");
+                    return;
+                }
+
                 if (rcr->RespuestaId == ar->IdRespuesta) {
-                    *pondxpreg = *pondxpreg * rcr->Ponderacion;
+                    *pondxpreg = (*pondxpreg) * (rcr->Ponderacion);
                 } else {
+                    if (rcr->sgte == NULL) {
+                        printf("ERROR: La lista circular de respuestas no está bien conformada (rcr->sgte == NULL)\n");
+                        return;
+                    }
+
                     aux = rcr->sgte;
                     while (aux != rcr) {
                         if (aux->RespuestaId == ar->IdRespuesta) {
-                            *pondxpreg = *pondxpreg * rcr->Ponderacion;
+                            *pondxpreg = (*pondxpreg) * (aux->Ponderacion);
                         }
                         aux = aux->sgte;
                     }
                 }
-                
-                totalpond = totalpond + *pondxpreg;
+
+                *totalpond = (*totalpond) + (*pondxpreg);
             }
-            
-            IRDcalculopond(ar->der, IdEncuesta, IdEncresp, Acumpond, pondxpreg, totalpart, IniP, IniR);
         }
+
+        IRDcalculopond(ar->der, IdEncuesta, &(*IdEncresp), &(*Acumpond), &(*pondxpreg), &(*totalpond), IniP, IniR, &(*contParti), &(*ultimo));
     }
 }
+
 
 
